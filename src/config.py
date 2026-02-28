@@ -41,12 +41,29 @@ TELEGRAM_DIR.mkdir(parents=True, exist_ok=True)
 RAW_CSV = TELEGRAM_DIR / "telegram_posts_cyprus_raw.csv"
 PRECLEANED_CSV = TELEGRAM_DIR / "telegram_posts_cyprus_precleaned.csv"
 CLEAN_CSV = TELEGRAM_DIR / "telegram_posts_cyprus_clean.csv"
+
+# ── Per-script split CSVs ─────────────────────────────────────────────────────
 CYRILLIC_CSV = TELEGRAM_DIR / "cyrillic_posts.csv"
-LATIN_CSV = TELEGRAM_DIR / "latin_posts.csv"
+LATIN_CSV    = TELEGRAM_DIR / "latin_posts.csv"
+GREEK_CSV    = TELEGRAM_DIR / "greek_posts.csv"
+
+# ── Lemmatized CSVs ───────────────────────────────────────────────────────────
 CYRILLIC_LEMMATIZED_CSV = TELEGRAM_DIR / "cyrillic_posts_lemmatized.csv"
-WORD_FREQ_CSV = TELEGRAM_DIR / "russian_word_frequency.csv"
-BIGRAMS_CSV = TELEGRAM_DIR / "russian_bigrams.csv"
-TRIGRAMS_CSV = TELEGRAM_DIR / "russian_trigrams.csv"
+LATIN_LEMMATIZED_CSV    = TELEGRAM_DIR / "latin_posts_lemmatized.csv"
+GREEK_LEMMATIZED_CSV    = TELEGRAM_DIR / "greek_posts_lemmatized.csv"
+
+# ── Frequency / n-gram CSVs ───────────────────────────────────────────────────
+WORD_FREQ_CSV   = TELEGRAM_DIR / "russian_word_frequency.csv"
+BIGRAMS_CSV     = TELEGRAM_DIR / "russian_bigrams.csv"
+TRIGRAMS_CSV    = TELEGRAM_DIR / "russian_trigrams.csv"
+
+LATIN_WORD_FREQ_CSV = TELEGRAM_DIR / "latin_word_frequency.csv"
+LATIN_BIGRAMS_CSV   = TELEGRAM_DIR / "latin_bigrams.csv"
+LATIN_TRIGRAMS_CSV  = TELEGRAM_DIR / "latin_trigrams.csv"
+
+GREEK_WORD_FREQ_CSV = TELEGRAM_DIR / "greek_word_frequency.csv"
+GREEK_BIGRAMS_CSV   = TELEGRAM_DIR / "greek_bigrams.csv"
+GREEK_TRIGRAMS_CSV  = TELEGRAM_DIR / "greek_trigrams.csv"
 
 # ── Model directory (placeholder) ────────────────────────────────────────────
 MODELS_DIR = ROOT_DIR / "models"

@@ -23,30 +23,33 @@ def clean_text(text) -> str:
 
 
 def classify_script(text) -> str:
-    """Classify *text* as ``'cyrillic'``, ``'latin'``, or ``'unknown'``."""
+    """Classify *text* as ``'cyrillic'``, ``'latin'``, ``'greek'``, or ``'unknown'``."""
     if pd.isna(text) or text == "":
         return "unknown"
     cyrillic = len(re.findall(r"[а-яА-ЯёЁ]", text))
-    latin = len(re.findall(r"[a-zA-Z]", text))
-    if cyrillic == 0 and latin == 0:
-        return "unknown"
-    return "cyrillic" if cyrillic > latin else "latin"
+    latin    = len(re.findall(r"[a-zA-Z]", text))
+    greek    = len(re.findall(r"[α-ωΑ-Ωά-ώΆ-Ώ]", text))
+    counts   = {"cyrillic": cyrillic, "latin": latin, "greek": greek}
+    dominant = max(counts, key=counts.get)
+    return dominant if counts[dominant] > 0 else "unknown"
 
 
 def clean_and_split(
     df: pd.DataFrame,
     text_col: str = "text",
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Clean the text column and split by script type.
 
-    Returns ``(full_df, cyrillic_df, latin_df)``.
+    Returns ``(full_df, cyrillic_df, latin_df, greek_df)``.
     """
     df["text_cleaned"] = df[text_col].apply(clean_text)
     df["script_type"] = df["text_cleaned"].apply(classify_script)
 
     cyrillic_df = df[df["script_type"] == "cyrillic"].copy()
-    latin_df = df[df["script_type"] == "latin"].copy()
+    latin_df    = df[df["script_type"] == "latin"].copy()
+    greek_df    = df[df["script_type"] == "greek"].copy()
 
     print(f"Cyrillic posts: {len(cyrillic_df)}")
     print(f"Latin posts:    {len(latin_df)}")
-    return df, cyrillic_df, latin_df
+    print(f"Greek posts:    {len(greek_df)}")
+    return df, cyrillic_df, latin_df, greek_df

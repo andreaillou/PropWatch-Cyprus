@@ -25,23 +25,37 @@ EXCLUDE_KEYWORDS: list[str] = [
 # ── Inclusion keywords (political topics) ────────────────────────────────────
 INCLUDE_KEYWORDS: dict[str, list[str]] = {
     "War_Conflict": [
+        # English / Latin
         r"war", r"invasion", r"conflict", r"military", r"army",
         r"frontline", r"attack",
+        # Russian / Cyrillic
         r"войн", r"воен", r"арми", r"фронт", r"наступлен", r"атак",
         r"\bсво\b", r"спецоперац",
+        # Greek
+        r"πόλεμ", r"εισβολ", r"σύγκρουσ", r"στρατ", r"μέτωπ", r"επίθεσ",
     ],
     "Key_Actors": [
+        # English / Latin
         r"putin", r"zelensky", r"biden", r"nato", r"eu", r"europe",
         r"kremlin", r"moscow", r"kiev", r"kyiv", r"trump",
+        # Russian / Cyrillic
         r"путин", r"зеленск", r"байден", r"нато", r"\bес\b", r"европ",
         r"кремл", r"москв", r"киев", r"росси", r"укоаин", r"\bрф\b",
         r"трамп",
+        # Greek
+        r"πούτιν", r"ζελένσκ", r"μπάιντεν", r"νατο", r"\bεε\b", r"ευρώπ",
+        r"κρεμλίν", r"μόσχ", r"κίεβ", r"ρωσί", r"ουκραιν", r"τραμπ",
     ],
     "Ideological_Terms": [
+        # English / Latin
         r"nazi", r"fascist", r"propaganda", r"fake", r"truth", r"west",
         r"imperial", r"russophobia",
+        # Russian / Cyrillic
         r"наци", r"фашист", r"пропаганд", r"фейк", r"правд", r"запад",
         r"импер", r"русофоб", r"освобожд",
+        # Greek
+        r"ναζ", r"φασίστ", r"προπαγάνδ", r"ψεύδ", r"αλήθει",
+        r"δύσ", r"ιμπεριαλ", r"ρωσοφοβ",
     ],
 }
 
