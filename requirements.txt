@@ -1,6 +1,44 @@
+# ── Data & I/O ────────────────────────────────────────────────────────────────
 pandas>=2.0
-telethon>=1.34
 python-dotenv>=1.0
+
+# ── Telegram scraping ─────────────────────────────────────────────────────────
+telethon>=1.34
+
+# ── NLP — language detection ──────────────────────────────────────────────────
+# lingua-py handles short texts and code-switched Greek/Russian/English far
+# better than character-counting heuristics. Authoritative language label.
+linguage-language-detector>=2.0
+
+# ── NLP — lemmatization (Russian + Greek, morphologically inflected) ──────────
+# stanza outperforms spaCy on Russian case inflection and Modern Greek
+# morphological tagging.  Used for BERTopic input quality (H1, H4).
+stanza>=1.8
+# One-time model download (run once after install):
+#   python -c "import stanza; stanza.download('ru'); stanza.download('el')"
+
+# ── NLP — English text + Track A syntactic features ──────────────────────────
+# spaCy is kept ONLY for English posts and Track A passive/imperative ratio.
+# Do NOT use spaCy for Russian or Greek lemmatization — use stanza above.
 spacy>=3.7
+# python -m spacy download en_core_web_lg
+
+# ── NLP — n-gram analysis ─────────────────────────────────────────────────────
 nltk>=3.9.3
-lingua-language-detector>=2.0
+
+# ── ML — propaganda technique classification (Paper 1) ────────────────────────
+# SemEval-2020 14-class schema; backbone: XLM-RoBERTa-large
+transformers>=4.40
+torch>=2.2
+
+# ── ML — narrative clustering with temporal analysis (Paper 1 + 2) ────────────
+# BERTopic for H1 (narrative frames) and H4 (temporal narrative drift)
+bertopic>=0.16
+sentence-transformers>=3.0
+scientific-python-distributions-metadata>=0.0.1  # bertopic transitive dep
+
+# ── Stats — interrupted time series (Paper 2, H3) ────────────────────────────
+# ITS regression around the January 2026 kompromat event.
+# forwards column from the scraper is the primary amplification proxy.
+statsmodels>=0.14
+scikit-learn>=1.4

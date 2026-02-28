@@ -1,28 +1,53 @@
-# Propaganda Paper Computation
+# PropWatch Cyprus
 
-Computational analysis of Russian-language propaganda dissemination through
-Telegram channels
+Computational pipeline for a two-paper academic project studying how Russian
+foreign-broadcast propaganda amplifies pre-existing Cypriot social cleavages.
+
+**Cleavage codes (Layer 2 annotation schema):** Cyprus division (`CY-DIV`),
+EU scepticism (`EU-SKEP`), 2013 bail-in (`BAIL-IN`), Orthodox identity
+(`ORTHO`), anti-elite populism (`ELIT`), migration (`MIGR`).
+
+**Paper 1 — Propaganda techniques & narrative framing:**
+SemEval-2020 14-class technique classification (XLM-RoBERTa-large) +
+BERTopic narrative clustering with temporal analysis (H1, H4).
+
+**Paper 2 — Amplification dynamics:**
+Interrupted time series (ITS) around the January 2026 kompromat event;
+`forwards` is the primary amplification proxy (H3).
+
+Both papers share one corpus scraped from the Russian Embassy Cyprus
+channel (`rusembcy`) on Telegram.
 
 ## Repository structure
 
 ```
-├── main.ipynb                     # End-to-end notebook (scrape → analyse)
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Template for API credentials
+├── main.ipynb                     # End-to-end pipeline notebook
+├── requirements.txt               # Python dependencies (see sections)
+├── .env.example                   # Template for Telegram API credentials
 ├── src/
-│   ├── config.py                  # Paths, constants, env-var loading
+│   ├── config.py                  # All file paths and scraping constants
 │   ├── scraping/
-│   │   └── telegram.py            # Telegram channel scraper (Telethon)
+│   │   └── telegram.py            # Telethon scraper — collects message_id,
+│   │                              #   views, forwards, reactions, reply_to_id,
+│   │                              #   edit_date alongside date/channel/text
 │   ├── preprocessing/
-│   │   ├── filtering.py           # Keyword filtering & category tagging
-│   │   └── text_cleaning.py       # Text normalisation & script detection
+│   │   ├── filtering.py           # 4-step pipeline: length → spam → topic
+│   │   │                          #   keywords → dedup; tags 9 binary columns
+│   │   │                          #   (3 existing + 6 cleavage codes)
+│   │   └── text_cleaning.py       # Text normalisation; lingua-py language
+│   │                              #   detection (authoritative); script-type
+│   │                              #   heuristic (secondary); splits corpus
+│   │                              #   into russian / english / greek subsets
 │   ├── analysis/
-│   │   ├── lemmatization.py       # spaCy-based Russian lemmatizer
+│   │   ├── lemmatization.py       # stanza-based lemmatization for Russian
+│   │   │                          #   (ru pipeline) and Greek (el pipeline);
+│   │   │                          #   spaCy is NOT used here
 │   │   └── frequency.py           # Word frequency & n-gram analysis
+│   │                              #   (script-agnostic, works on list[str])
 │   └── classification/
-│       └── model.py               # Propaganda classifier (draft / TODO)
+│       └── model.py               # Propaganda classifier stub (TODO)
 ├── cyprus_data/
-│   └── telegram/russian_embassy/  # Scraped & processed data files
+│   └── telegram/russian_embassy/  # All raw and processed CSV outputs
 └── models/                        # Trained model weights (not committed)
 ```
 
@@ -31,30 +56,58 @@ Telegram channels
 ```bash
 # 1. Clone and install
 git clone <repo-url>
-cd propaganda_paper_computation
+cd PropWatch-Cyprus
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Download spaCy Russian model (needed for lemmatization)
-python -m spacy download ru_core_news_lg
+# 2. Download stanza models (lemmatization — run once)
+python -c "import stanza; stanza.download('ru'); stanza.download('el')"
 
-# 3. Configure Telegram credentials
+# 3. Download spaCy English model (Track A syntactic features — run once)
+python -m spacy download en_core_web_lg
+
+# 4. Configure Telegram credentials
 cp .env.example .env
-# Edit .env with your TELEGRAM_APP_ID and TELEGRAM_API_HASH
+# Edit .env — set TELEGRAM_APP_ID and TELEGRAM_API_HASH
 
-# 4. Run the notebook or individual modules
+# 5. Run the notebook
 jupyter notebook main.ipynb
-# — or —
+# — or run the scraper directly —
 python -m src.scraping.telegram
+```
+
+## Pipeline overview
+
+```
+scrape_channels()          → raw CSV (9 fields incl. forwards, reactions)
+    ↓
+filter_messages()          → length / spam / topic filter + 9 binary tags
+    ↓
+clean_and_split()          → text_cleaned | script_type | language
+                             └─ russian_df / english_df / greek_df
+    ↓
+lemmatize_column()         → Russian lemmas (stanza ru)
+lemmatize_greek_column()   → Greek lemmas  (stanza el)
+    ↓
+word_frequency()           → per-language top-N lemma frequency CSVs
+compute_ngrams()           → bigrams / trigrams per language
+    ↓
+[TODO] BERTopic            → narrative clusters + temporal drift (H1, H4)
+[TODO] XLM-RoBERTa-large  → SemEval-2020 14-class technique labels (Paper 1)
+[TODO] ITS regression      → amplification analysis around Jan 2026 (H3)
 ```
 
 ## Status
 
-| Component                       | Status                                          |
-| ------------------------------- | ----------------------------------------------- |
-| Telegram scraping               | ✅ Working                                      |
-| Keyword filtering & tagging     | ✅ Working                                      |
-| Text cleaning & script split    | ✅ Working                                      |
-| Russian lemmatization           | ✅ Working                                      |
-| Frequency / n-gram analysis     | ✅ Working                                      |
-| Propaganda classification model | 🚧 Draft — awaiting trained model & full corpus |
+| Component                                  | Status                                           |
+| ------------------------------------------ | ------------------------------------------------ |
+| Telegram scraping (incl. forwards/reactions)| ✅ Working                                       |
+| Keyword filtering & cleavage-code tagging  | ✅ Working (9 categories, 3 scripts)             |
+| lingua-py language detection               | ✅ Working (Russian / Greek / English)           |
+| Text cleaning & corpus split               | ✅ Working                                       |
+| Russian lemmatization (stanza)             | ✅ Working                                       |
+| Greek lemmatization (stanza)               | ✅ Working                                       |
+| Frequency / n-gram analysis                | ✅ Working (script-agnostic)                     |
+| BERTopic narrative clustering              | 🚧 TODO — H1 / H4                               |
+| XLM-RoBERTa-large classification           | 🚧 TODO — awaiting fine-tuned weights           |
+| Interrupted time series (H3)               | 🚧 TODO — Jan 2026 kompromat event              |

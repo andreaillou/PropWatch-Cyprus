@@ -57,6 +57,55 @@ INCLUDE_KEYWORDS: dict[str, list[str]] = {
         r"ναζ", r"φασίστ", r"προπαγάνδ", r"ψεύδ", r"αλήθει",
         r"δύσ", r"ιμπεριαλ", r"ρωσοφοβ",
     ],
+    # ── Cleavage codes (Layer 2 annotation schema) ────────────────────────
+    "CY_DIV": [
+        # English / Latin
+        r"cyprus problem", r"reunification", r"occupied", r"buffer zone",
+        # Greek
+        r"κυπριακό", r"επανένωσ", r"κατεχόμεν", r"πράσινη γραμμή",
+        # Russian / Cyrillic
+        r"кипрск", r"разделени", r"оккупир", r"турецк",
+    ],
+    "EU_SKEP": [
+        # English / Latin
+        r"brussels", r"eu sanctions", r"sovereignty",
+        # Greek
+        r"βρυξέλλ", r"κυριαρχί", r"κυρώσεις", r"ευρωπαϊκ",
+        # Russian / Cyrillic
+        r"брюссел", r"суверенит", r"санкц", r"евросоюз",
+    ],
+    "BAIL_IN": [
+        # English / Latin
+        r"bail.in", r"haircut", r"imf", r"bank levy", r"deposit",
+        # Greek
+        r"κούρεμα", r"κυπριακή τράπεζα", r"ΔΝΤ", r"καταθέσ",
+        # Russian / Cyrillic
+        r"стрижк", r"кипрск банк", r"мвф", r"вклад",
+    ],
+    "ORTHO": [
+        # English / Latin
+        r"orthodox", r"church", r"civilisation", r"christian values",
+        # Greek
+        r"ορθόδοξ", r"εκκλησί", r"χριστιανικ", r"πολιτισμ",
+        # Russian / Cyrillic
+        r"православ", r"церков", r"цивилизац", r"христианск",
+    ],
+    "ELIT": [
+        # English / Latin
+        r"corrupt elite", r"deep state", r"establishment", r"oligarch",
+        # Greek
+        r"ελίτ", r"διαφθορ", r"κατεστημέν", r"παρακράτ",
+        # Russian / Cyrillic
+        r"элит", r"коррупц", r"истеблишмент", r"олигарх",
+    ],
+    "MIGR": [
+        # English / Latin
+        r"migrant", r"refugee", r"illegal immigration", r"border",
+        # Greek
+        r"μετανάστ", r"πρόσφυγ", r"παράνομ", r"σύνορ",
+        # Russian / Cyrillic
+        r"мигрант", r"беженц", r"нелегальн", r"границ",
+    ],
 }
 
 
