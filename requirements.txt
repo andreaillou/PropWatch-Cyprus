@@ -47,6 +47,8 @@ scikit-learn>=1.4
 twarc>=2.14
 pyyaml>=6.0
 
-# ── Archived content (Tier 1: GDELT + Internet Archive + trafilatura) ─────────
+# ── Archived content (Tier 1: RT, Sputnik via direct sitemap + trafilatura) ───
 trafilatura>=1.12
-requests>=2.31
+
+# ── News sitemap scraping (Tier 1: RT, Sputnik via direct sitemap) ────────────
+feedparser>=6.0

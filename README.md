@@ -33,7 +33,7 @@ channel (`rusembcy`) on Telegram.
 │   │   │                          #   views, forwards, reactions, reply_to_id,
 │   │   │                          #   edit_date alongside date/channel/text
 │   │   ├── twitter.py             # twarc2 scraper — Jan 2026 kompromat event
-│   │   └── gdelt.py               # GDELT + Wayback scraper — Tier 1 archived
+│   │   └── news.py                # Direct sitemap scraper — Tier 1 archived
 │   ├── preprocessing/
 │   │   ├── filtering.py           # 4-step pipeline: length → spam → topic
 │   │   │                          #   keywords → dedup; tags 9 binary columns
@@ -85,10 +85,10 @@ python -m src.scraping.telegram
 # 6. (Optional) Twitter scraping — requires bearer token in .env
 python -m src.scraping.twitter
 
-# 7. (Optional) Tier 1 archived content — RT/Sputnik via GDELT + Wayback
-python -m src.scraping.gdelt
-# Note: fetch_text=True is slow (~1.5s per article). For metadata-only
-# discovery pass, edit gdelt.py and set fetch_text=False first.
+# 7. Tier 1 archived content — RT/Sputnik via direct sitemap
+python -m src.scraping.news
+# Add sitemap_index URLs to configs/channels.yaml for each source before running.
+# RT English and RT Russian are pre-configured. Sputnik URLs need verification.
 ```
 
 ## Pipeline overview
@@ -119,7 +119,7 @@ compute_ngrams()           → bigrams / trigrams per language
 | Telegram scraping (single channel) | ✅ Working |
 | Multi-channel config (`channels.yaml`) | 🚧 Added — populate Tier 2 handles from source list |
 | Twitter/X scraper (Jan 2026 kompromat) | 🚧 Added — requires bearer token |
-| Tier 1 archived scraper (GDELT + Wayback + trafilatura) | 🚧 Added — `python -m src.scraping.gdelt` |
+| Tier 1 news scraper (RT/Sputnik via sitemap + trafilatura) | 🚧 Added — `python -m src.scraping.news` |
 | Keyword filtering & cleavage-code tagging | ✅ Working |
 | lingua-py language detection | ✅ Working |
 | Text cleaning & corpus split | ✅ Working (bug fix applied) |

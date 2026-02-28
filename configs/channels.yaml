@@ -1,34 +1,43 @@
 # PropWatch Cyprus — Telegram channel source list
 # Tier classification follows the paper corpus design.
-# archived: true  → content sourced via GDELT / Internet Archive, not live scraping
+# archived: true  → content sourced via sitemap + trafilatura, not live scraping
 # active: true    → live Telethon scraping
 
 tier1_archived:
+  - handle: rt_english
+    label: RT English
+    language: english
+    archived: true
+    domain: rt.com
+    sitemap_index: https://www.rt.com/sitemap.xml
+
   - handle: rt_russian
     label: RT Russian
     language: russian
     archived: true
     domain: russian.rt.com
-  - handle: rt_news
-    label: RT English
-    language: english
-    archived: true
-    domain: rt.com
+    sitemap_index: https://russian.rt.com/sitemap.xml
+
   - handle: sputniknewsru
     label: Sputnik Russian
     language: russian
     archived: true
     domain: sputniknews.com
+    # sitemap_index: verify URL before adding — sputniknews.com access varies by region
+
   - handle: sputnik_world
     label: Sputnik World (English)
     language: english
     archived: true
-    domain: sputniknews.com
+    domain: sputnikglobe.com
+    # sitemap_index: verify URL before adding — check https://sputnikglobe.com/sitemap.xml
+
   - handle: sputnik_md
     label: Sputnik Moldova
     language: russian
     archived: true
     domain: sputnik.md
+    # sitemap_index: verify URL before adding — check https://sputnik.md/sitemap.xml
 
 tier2_postban:
   # Channels identified via EUvsDisinfo / EU DisinfoLab / Friedrich Naumann Foundation
