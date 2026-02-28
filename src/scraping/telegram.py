@@ -45,7 +45,22 @@ async def scrape_channels(
     Returns
     -------
     pd.DataFrame
-        DataFrame with columns ``date``, ``channel``, ``region``, ``text``.
+        DataFrame with columns:
+
+        - ``message_id``  – Telegram message ID; use for deduplication and
+          span-to-source linking in annotation.
+        - ``date``        – UTC timestamp of the original message.
+        - ``channel``     – Channel username/handle.
+        - ``region``      – Region label from the ``CHANNELS`` mapping.
+        - ``text``        – Message text (newlines collapsed to spaces).
+        - ``views``       – View count at scrape time (engagement signal).
+        - ``forwards``    – Forward count; primary amplification proxy for
+          H3 interrupted time-series analysis.  **Cannot be recovered
+          post-hoc — must be collected at scrape time.**
+        - ``reactions``   – Total reaction count (sum across all emoji types).
+        - ``reply_to_id`` – ``message_id`` of the parent message if this is
+          a reply, else ``None``.
+        - ``edit_date``   – UTC timestamp of the last edit, or ``None``.
     """
     all_data: list[dict] = []
 
@@ -63,10 +78,16 @@ async def scrape_channels(
                         if msg.text:
                             all_data.append(
                                 {
+                                    "message_id": msg.id,
                                     "date": msg.date,
                                     "channel": name,
                                     "region": region,
                                     "text": msg.text.replace("\n", " "),
+                                    "views": msg.views or 0,
+                                    "forwards": msg.forwards or 0,
+                                    "reactions": sum(r.count for r in msg.reactions.results) if msg.reactions else 0,
+                                    "reply_to_id": msg.reply_to.reply_to_msg_id if msg.reply_to else None,
+                                    "edit_date": msg.edit_date,
                                 }
                             )
                             msg_count += 1
