@@ -99,15 +99,15 @@ compute_ngrams()           → bigrams / trigrams per language
 
 ## Status
 
-| Component                                  | Status                                           |
-| ------------------------------------------ | ------------------------------------------------ |
-| Telegram scraping (incl. forwards/reactions)| ✅ Working                                       |
-| Keyword filtering & cleavage-code tagging  | ✅ Working (9 categories, 3 scripts)             |
-| lingua-py language detection               | ✅ Working (Russian / Greek / English)           |
-| Text cleaning & corpus split               | ✅ Working                                       |
-| Russian lemmatization (stanza)             | ✅ Working                                       |
-| Greek lemmatization (stanza)               | ✅ Working                                       |
-| Frequency / n-gram analysis                | ✅ Working (script-agnostic)                     |
-| BERTopic narrative clustering              | 🚧 TODO — H1 / H4                               |
-| XLM-RoBERTa-large classification           | 🚧 TODO — awaiting fine-tuned weights           |
-| Interrupted time series (H3)               | 🚧 TODO — Jan 2026 kompromat event              |
+| Component                                    | Status                                 |
+| -------------------------------------------- | -------------------------------------- |
+| Telegram scraping (incl. forwards/reactions) | ✅ Working                             |
+| Keyword filtering & cleavage-code tagging    | ✅ Working (9 categories, 3 scripts)   |
+| lingua-py language detection                 | ✅ Working (Russian / Greek / English) |
+| Text cleaning & corpus split                 | ✅ Working                             |
+| Russian lemmatization (stanza)               | ✅ Working                             |
+| Greek lemmatization (stanza)                 | ✅ Working                             |
+| Frequency / n-gram analysis                  | ✅ Working (script-agnostic)           |
+| BERTopic narrative clustering                | 🚧 TODO — H1 / H4                      |
+| XLM-RoBERTa-large classification             | 🚧 TODO — awaiting fine-tuned weights  |
+| Interrupted time series (H3)                 | 🚧 TODO — Jan 2026 kompromat event     |
