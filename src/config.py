@@ -18,7 +18,7 @@ load_dotenv()
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 # ── Telegram API ─────────────────────────────────────────────────────────────
-TELEGRAM_APP_ID = int(os.getenv("TELEGRAM_APP_ID"))
+TELEGRAM_APP_ID = int(os.getenv("TELEGRAM_APP_ID", "0"))
 TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
 
 # ── Twitter/X API ────────────────────────────────────────────────────────────
@@ -52,9 +52,10 @@ PROCESSED_DIR = DATA_DIR / "processed"
 
 TELEGRAM_RAW_DIR = RAW_DIR / "telegram"
 TWITTER_RAW_DIR  = RAW_DIR / "twitter"
+ARCHIVED_RAW_DIR = RAW_DIR / "archived"
 
 # Ensure directories exist at import time
-for _d in [TELEGRAM_RAW_DIR, TWITTER_RAW_DIR, PROCESSED_DIR]:
+for _d in [TELEGRAM_RAW_DIR, TWITTER_RAW_DIR, ARCHIVED_RAW_DIR, PROCESSED_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
 
 # ── Merged corpus output paths (all channels combined) ────────────────────

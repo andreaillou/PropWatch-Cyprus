@@ -8,18 +8,27 @@ tier1_archived:
     label: RT Russian
     language: russian
     archived: true
+    domain: rt.com
   - handle: rt_news
     label: RT English
     language: english
     archived: true
+    domain: rt.com
   - handle: sputniknewsru
     label: Sputnik Russian
     language: russian
     archived: true
+    domain: sputniknews.com
   - handle: sputnik_world
     label: Sputnik World (English)
     language: english
     archived: true
+    domain: sputniknews.com
+  - handle: sputnik_md
+    label: Sputnik Moldova
+    language: russian
+    archived: true
+    domain: sputnik.md
 
 tier2_postban:
   # Channels identified via EUvsDisinfo / EU DisinfoLab / Friedrich Naumann Foundation

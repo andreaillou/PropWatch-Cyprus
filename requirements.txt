@@ -46,3 +46,7 @@ scikit-learn>=1.4
 # ── Twitter/X scraping (Jan 2026 kompromat event — Paper 2, H3) ──────────────
 twarc>=2.14
 pyyaml>=6.0
+
+# ── Archived content (Tier 1: GDELT + Internet Archive + trafilatura) ─────────
+trafilatura>=1.12
+requests>=2.31
