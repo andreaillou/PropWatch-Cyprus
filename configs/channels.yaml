@@ -8,7 +8,7 @@ tier1_archived:
     label: RT Russian
     language: russian
     archived: true
-    domain: rt.com
+    domain: russian.rt.com
   - handle: rt_news
     label: RT English
     language: english
