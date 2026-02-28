@@ -1,12 +1,12 @@
 """GDELT Doc 2.0 scraper for Tier 1 archived sources (RT, Sputnik).
 
-Queries the GDELT Document API for articles from rt.com and
-sputniknews.com mentioning Cyprus-relevant keywords. Then fetches
-full article text from the Internet Archive (Wayback Machine) via
-trafilatura, falling back to the live URL if the archive returns nothing.
+Queries the GDELT Document API for articles from rt.com,
+sputniknews.com, and sputnik.md mentioning Cyprus-relevant keywords.
+Fetches full article text via trafilatura — live URL first, Wayback
+Machine snapshot as fallback.
 
-No authentication required. Rate-limit: max 1 req/sec to GDELT,
-be polite to Archive.org.
+No authentication required. GDELT free tier enforces rate limits;
+the scraper uses linear backoff before every request.
 
 Usage::
 
@@ -28,12 +28,10 @@ GDELT_API = "https://api.gdeltproject.org/api/v2/doc/doc"
 # Domains to target — foreign-broadcast only (not domestic Russian)
 TIER1_DOMAINS = ["rt.com", "sputniknews.com", "sputnik.md"]
 
-# Cyprus-relevant keyword query sent to GDELT
-# Keep broad — downstream filtering handles specificity
-CYPRUS_QUERY = (
-    '"Cyprus" OR "Κύπρος" OR "Кипр" OR '
-    '"Christodoulides" OR "rusembcy" OR "ELAM"'
-)
+# Cyprus-relevant keyword query sent to GDELT.
+# ASCII-only — GDELT free tier drops non-ASCII OR terms silently.
+# Keep broad; language-specific filtering is done downstream.
+CYPRUS_QUERY = "Cyprus OR Christodoulides OR Nicosia OR Famagusta"
 
 # GDELT date range: study window start → today
 GDELT_START = START_DATE.strftime("%Y%m%d%H%M%S")  # e.g. "20240101000000"
@@ -46,15 +44,20 @@ def _gdelt_query(
     query: str = CYPRUS_QUERY,
     start: str = GDELT_START,
     max_records: int = 250,
+    retries: int = 4,
+    base_backoff: float = 12.0,
 ) -> list[dict]:
     """Call GDELT Doc API and return article metadata for one domain.
 
     Parameters
     ----------
-    domain : e.g. ``"rt.com"``
-    query  : free-text query string
-    start  : GDELT datetime string ``"YYYYMMDDHHMMSS"``
-    max_records : capped at 250 by GDELT free tier
+    domain       : e.g. ``"rt.com"``
+    query        : ASCII-only free-text query string
+    start        : GDELT datetime string ``"YYYYMMDDHHMMSS"``
+    max_records  : capped at 250 by GDELT free tier
+    retries      : number of attempts before giving up
+    base_backoff : seconds to wait before first attempt; multiplied by
+                   attempt number on each retry (linear backoff)
 
     Returns list of dicts with keys: url, title, seendate, domain, language, sourcecountry
     """
@@ -66,31 +69,46 @@ def _gdelt_query(
         "format": "json",
         "sort": "DateDesc",
     }
-    resp = requests.get(GDELT_API, params=params, timeout=30)
-    resp.raise_for_status()
-    data = resp.json()
-    return data.get("articles", [])
+    for attempt in range(1, retries + 1):
+        wait = base_backoff * attempt
+        print(f"   [GDELT] Attempt {attempt}/{retries} — waiting {wait}s before request...")
+        time.sleep(wait)
+        try:
+            resp = requests.get(GDELT_API, params=params, timeout=30)
+            resp.raise_for_status()
+            return resp.json().get("articles", [])
+        except requests.HTTPError as e:
+            if resp.status_code == 429:
+                print(f"   [429] Rate limited. Will retry...")
+                continue
+            raise
+        except requests.RequestException as e:
+            print(f"   [!] Request error on attempt {attempt}: {e}")
+            if attempt == retries:
+                raise
+    return []
 
 
-def _fetch_text(url: str, try_archive: bool = True) -> str:
+def _fetch_text(url: str) -> str:
     """Fetch full article text via trafilatura.
 
-    First attempts the Wayback Machine snapshot (if try_archive=True),
-    then falls back to the live URL. Returns empty string on failure.
+    Tries the live URL first (faster, works if not geo-blocked), then
+    falls back to the Wayback Machine snapshot. Returns empty string on
+    total failure.
     """
-    if try_archive:
-        archive_url = f"https://web.archive.org/web/{url}"
-        try:
-            downloaded = trafilatura.fetch_url(archive_url)
-            text = trafilatura.extract(downloaded) or ""
-            if text.strip():
-                return text.strip()
-        except Exception:
-            pass
-
-    # Fallback: live URL (may be blocked from EU IP)
+    # Attempt 1: live URL
     try:
         downloaded = trafilatura.fetch_url(url)
+        text = (trafilatura.extract(downloaded) or "").strip()
+        if text:
+            return text
+    except Exception:
+        pass
+
+    # Attempt 2: Wayback Machine (most recent snapshot)
+    try:
+        archive_url = f"https://web.archive.org/web/{url}"
+        downloaded = trafilatura.fetch_url(archive_url)
         return (trafilatura.extract(downloaded) or "").strip()
     except Exception:
         return ""
