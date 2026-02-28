@@ -1,64 +1,54 @@
-"""Lemmatization for Russian and Greek sub-corpora using stanza.
+"""Lemmatization for all three sub-corpora.
 
-stanza is used for both languages because it handles morphological case
-inflection better than spaCy on Russian (ru pipeline) and outperforms
-spaCy on Modern Greek benchmarks (el pipeline).
+Language assignment:
+- Russian  → stanza ``ru`` pipeline  (handles morphological case inflection)
+- Greek    → stanza ``el`` pipeline  (outperforms spaCy on Modern Greek)
+- English  → spaCy ``en_core_web_lg`` (Track A features; RT/Sputnik English content)
 
-NOTE: spaCy is intentionally NOT used here. It remains in the project
-only for English text and Track A syntactic feature extraction
-(passive voice ratio, imperative verb ratio). Do not replace or merge
-those concerns into this module.
+Do NOT use spaCy for Russian or Greek. Do NOT use stanza for English.
 
-First-time setup (run once in your environment):
-    import stanza
-    stanza.download("ru")
-    stanza.download("el")
-
-TODO (future quality upgrade): For Greek lemmatization, consider
-replacing stanza with GR-NLP-TOOLKIT (Greek-BERT-based), which
-outperforms stanza on Modern Greek morphological tagging. Hold off
-until the pipeline is stable — it is a niche library.
+First-time setup (run once):
+    import stanza; stanza.download("ru"); stanza.download("el")
+    python -m spacy download en_core_web_lg
 """
 
 from __future__ import annotations
 
 import stanza
+import spacy
 import pandas as pd
 
 
-# ── Module-level pipeline cache ───────────────────────────────────────────────
-# Pipelines are expensive to initialise; load once and reuse.
+# ── Pipeline cache — load once, reuse everywhere ──────────────────────────────
 _NLP_RU: stanza.Pipeline | None = None
 _NLP_EL: stanza.Pipeline | None = None
+_NLP_EN: spacy.Language | None = None
 
 
 def _get_ru_pipeline() -> stanza.Pipeline:
     global _NLP_RU
     if _NLP_RU is None:
-        _NLP_RU = stanza.Pipeline(
-            "ru",
-            processors="tokenize,pos,lemma",
-            use_gpu=False,   # set True if running on GPU
-            verbose=False,
-        )
+        _NLP_RU = stanza.Pipeline("ru", processors="tokenize,pos,lemma",
+                                  use_gpu=False, verbose=False)
     return _NLP_RU
 
 
 def _get_el_pipeline() -> stanza.Pipeline:
     global _NLP_EL
     if _NLP_EL is None:
-        _NLP_EL = stanza.Pipeline(
-            "el",
-            processors="tokenize,pos,lemma",
-            use_gpu=False,
-            verbose=False,
-        )
+        _NLP_EL = stanza.Pipeline("el", processors="tokenize,pos,lemma",
+                                  use_gpu=False, verbose=False)
     return _NLP_EL
 
 
-# ── Russian stop words (minimal functional list) ──────────────────────────────
-# stanza does not expose a stop word list directly.
-# This covers the most common Russian function words.
+def _get_en_pipeline() -> spacy.Language:
+    global _NLP_EN
+    if _NLP_EN is None:
+        _NLP_EN = spacy.load("en_core_web_lg")
+    return _NLP_EN
+
+
+# ── Stop word lists ───────────────────────────────────────────────────────────
 _RU_STOPWORDS: frozenset[str] = frozenset({
     "и", "в", "не", "на", "что", "с", "по", "как", "это", "к",
     "из", "но", "за", "то", "до", "же", "от", "а", "или", "об",
@@ -67,7 +57,6 @@ _RU_STOPWORDS: frozenset[str] = frozenset({
     "уже", "ещё", "даже", "только", "если", "когда", "чтобы",
 })
 
-# ── Greek stop words (minimal functional list) ────────────────────────────────
 _EL_STOPWORDS: frozenset[str] = frozenset({
     "και", "το", "τα", "τη", "τον", "την", "τους", "τις", "της",
     "με", "για", "από", "στο", "στη", "στον", "στην", "στα",
@@ -76,35 +65,17 @@ _EL_STOPWORDS: frozenset[str] = frozenset({
 })
 
 
-# ── Core lemmatization functions ──────────────────────────────────────────────────
+# ── Single-text lemmatization ─────────────────────────────────────────────────
 
-def lemmatize_russian(text: str | float, nlp: stanza.Pipeline | None = None) -> list[str]:
-    """Lemmatize a single Russian text string.
-
-    Parameters
-    ----------
-    text : str or NaN
-        Input text (raw or cleaned).
-    nlp : stanza.Pipeline, optional
-        A pre-loaded stanza Russian pipeline. If None, uses the
-        module-level cached pipeline (preferred).
-
-    Returns
-    -------
-    list[str]
-        Filtered lemmas: lowercase, alphabetic, length > 2,
-        not in Russian stop word list.
-    """
+def lemmatize_russian(text: str | float) -> list[str]:
+    """Lemmatize one Russian string via stanza ru pipeline."""
     if pd.isna(text) or str(text).strip() == "":
         return []
-
-    pipeline = nlp if nlp is not None else _get_ru_pipeline()
-    doc = pipeline(str(text))
-
+    doc = _get_ru_pipeline()(str(text))
     return [
         word.lemma.lower()
-        for sentence in doc.sentences
-        for word in sentence.words
+        for sent in doc.sentences
+        for word in sent.words
         if word.lemma
         and word.lemma.lower() not in _RU_STOPWORDS
         and word.upos not in ("PUNCT", "SYM", "X")
@@ -113,33 +84,15 @@ def lemmatize_russian(text: str | float, nlp: stanza.Pipeline | None = None) -> 
     ]
 
 
-def lemmatize_greek(text: str | float, nlp: stanza.Pipeline | None = None) -> list[str]:
-    """Lemmatize a single Modern Greek text string.
-
-    Parameters
-    ----------
-    text : str or NaN
-        Input text (raw or cleaned).
-    nlp : stanza.Pipeline, optional
-        A pre-loaded stanza Greek pipeline. If None, uses the
-        module-level cached pipeline (preferred).
-
-    Returns
-    -------
-    list[str]
-        Filtered lemmas: lowercase, alphabetic, length > 2,
-        not in Greek stop word list.
-    """
+def lemmatize_greek(text: str | float) -> list[str]:
+    """Lemmatize one Modern Greek string via stanza el pipeline."""
     if pd.isna(text) or str(text).strip() == "":
         return []
-
-    pipeline = nlp if nlp is not None else _get_el_pipeline()
-    doc = pipeline(str(text))
-
+    doc = _get_el_pipeline()(str(text))
     return [
         word.lemma.lower()
-        for sentence in doc.sentences
-        for word in sentence.words
+        for sent in doc.sentences
+        for word in sent.words
         if word.lemma
         and word.lemma.lower() not in _EL_STOPWORDS
         and word.upos not in ("PUNCT", "SYM", "X")
@@ -148,72 +101,11 @@ def lemmatize_greek(text: str | float, nlp: stanza.Pipeline | None = None) -> li
     ]
 
 
-# ── DataFrame-level helpers ───────────────────────────────────────────────────────
-
-def lemmatize_column(
-    df: pd.DataFrame,
-    text_col: str = "text_cleaned",
-    nlp: stanza.Pipeline | None = None,
-) -> pd.DataFrame:
-    """Add a ``lemmas`` column to *df* using Russian lemmatization.
-
-    Mutates and returns *df*. The ``lemmas`` column contains a list[str]
-    per row (empty list for empty/NaN input).
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Must contain *text_col*.
-    text_col : str
-        Column of cleaned Russian text to lemmatize.
-    nlp : stanza.Pipeline, optional
-        Pass a pre-loaded pipeline to avoid re-loading across calls.
-        If None, uses the module-level cached pipeline.
-    """
-    pipeline = nlp if nlp is not None else _get_ru_pipeline()
-    print(f"Starting Russian lemmatization (stanza) on {len(df)} rows...")
-    df["lemmas"] = df[text_col].apply(lambda t: lemmatize_russian(t, pipeline))
-    print(f"Completed. {len(df)} Russian posts lemmatized.")
-    return df
-
-
-def lemmatize_greek_column(
-    df: pd.DataFrame,
-    text_col: str = "text_cleaned",
-    nlp: stanza.Pipeline | None = None,
-) -> pd.DataFrame:
-    """Add a ``lemmas`` column to *df* using Greek lemmatization.
-
-    Identical contract to :func:`lemmatize_column` but uses the
-    stanza Greek (el) pipeline.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Must contain *text_col*.
-    text_col : str
-        Column of cleaned Greek text to lemmatize.
-    nlp : stanza.Pipeline, optional
-        Pass a pre-loaded pipeline to avoid re-loading across calls.
-        If None, uses the module-level cached pipeline.
-    """
-    pipeline = nlp if nlp is not None else _get_el_pipeline()
-    print(f"Starting Greek lemmatization (stanza) on {len(df)} rows...")
-    df["lemmas"] = df[text_col].apply(lambda t: lemmatize_greek(t, pipeline))
-    print(f"Completed. {len(df)} Greek posts lemmatized.")
-    return df
-
-
-import pandas as pd
-
-
-# ── Shared core ──────────────────────────────────────────────────────────────────
-
-def _lemmatize(text, nlp) -> list[str]:
-    """Shared lemmatization logic for any spaCy model."""
-    if pd.isna(text) or text == "":
+def lemmatize_english(text: str | float) -> list[str]:
+    """Lemmatize one English string via spaCy en_core_web_lg."""
+    if pd.isna(text) or str(text).strip() == "":
         return []
-    doc = nlp(str(text))
+    doc = _get_en_pipeline()(str(text))
     return [
         token.lemma_.lower()
         for token in doc
@@ -225,108 +117,41 @@ def _lemmatize(text, nlp) -> list[str]:
     ]
 
 
-# ── Per-language convenience wrappers ────────────────────────────────────────────
-
-def lemmatize_russian(text, nlp) -> list[str]:
-    """Lemmatize a single Russian text string.
-
-    Parameters
-    ----------
-    text : str or NaN
-    nlp : spacy.Language
-        A loaded spaCy Russian model (e.g. ``ru_core_news_lg``).
-
-    Returns
-    -------
-    list[str]
-        Filtered lemmas (lowercase, alphabetic, length > 2, no stop-words).
-    """
-    return _lemmatize(text, nlp)
-
-
-def lemmatize_greek(text, nlp) -> list[str]:
-    """Lemmatize a single Modern Greek text string.
-
-    Parameters
-    ----------
-    text : str or NaN
-    nlp : spacy.Language
-        A loaded spaCy Greek model (e.g. ``el_core_news_lg``).
-
-    Returns
-    -------
-    list[str]
-        Filtered lemmas (lowercase, alphabetic, length > 2, no stop-words).
-    """
-    return _lemmatize(text, nlp)
-
-
-def lemmatize_latin(text, nlp) -> list[str]:
-    """Lemmatize a single Latin-script (English / other) text string.
-
-    Parameters
-    ----------
-    text : str or NaN
-    nlp : spacy.Language
-        A loaded spaCy Latin-script model (e.g. ``en_core_web_lg``).
-
-    Returns
-    -------
-    list[str]
-        Filtered lemmas (lowercase, alphabetic, length > 2, no stop-words).
-    """
-    return _lemmatize(text, nlp)
-
-
-# ── Column-level helper ───────────────────────────────────────────────────────────
-
-_SCRIPT_MODEL_DEFAULTS: dict[str, str] = {
-    "cyrillic": "ru_core_news_lg",
-    "greek":    "el_core_news_lg",
-    "latin":    "en_core_web_lg",
-}
-
+# ── DataFrame-level helpers ───────────────────────────────────────────────────
 
 def lemmatize_column(
     df: pd.DataFrame,
     text_col: str = "text_cleaned",
-    script: str = "cyrillic",
-    nlp=None,
 ) -> pd.DataFrame:
-    """Add a ``lemmas`` column to *df* using the appropriate spaCy model.
+    """Add ``lemmas`` column to *df* using Russian stanza lemmatization."""
+    print(f"Russian lemmatization (stanza) — {len(df)} rows...")
+    df["lemmas"] = df[text_col].apply(lemmatize_russian)
+    print(f"Done. {len(df)} rows lemmatized.")
+    return df
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-    text_col : str
-        Column containing cleaned text.
-    script : ``'cyrillic'`` | ``'greek'`` | ``'latin'``
-        Script type; determines which spaCy model to load automatically when
-        *nlp* is ``None``.
 
-        * ``'cyrillic'`` → ``ru_core_news_lg``
-        * ``'greek'``    → ``el_core_news_lg``
-        * ``'latin'``    → ``en_core_web_lg``
-    nlp : spacy.Language, optional
-        Pre-loaded model.  Pass this to avoid reloading between calls.
+def lemmatize_greek_column(
+    df: pd.DataFrame,
+    text_col: str = "text_cleaned",
+) -> pd.DataFrame:
+    """Add ``lemmas`` column to *df* using Greek stanza lemmatization."""
+    print(f"Greek lemmatization (stanza) — {len(df)} rows...")
+    df["lemmas"] = df[text_col].apply(lemmatize_greek)
+    print(f"Done. {len(df)} rows lemmatized.")
+    return df
 
-    Returns
-    -------
-    pd.DataFrame
-        Input DataFrame with an added ``lemmas`` column.
+
+def lemmatize_english_column(
+    df: pd.DataFrame,
+    text_col: str = "text_cleaned",
+) -> pd.DataFrame:
+    """Add ``lemmas`` column to *df* using English spaCy lemmatization.
+
+    Used for RT/Sputnik English articles (Tier 1) and English Telegram posts.
+    Requires ``en_core_web_lg``:
+        python -m spacy download en_core_web_lg
     """
-    if script not in _SCRIPT_MODEL_DEFAULTS:
-        raise ValueError(
-            f"Unknown script '{script}'. Choose from: "
-            + ", ".join(_SCRIPT_MODEL_DEFAULTS)
-        )
-
-    if nlp is None:
-        import spacy
-        nlp = spacy.load(_SCRIPT_MODEL_DEFAULTS[script])
-
-    lang_label = script.capitalize()
-    print(f"Starting {lang_label} lemmatization with spaCy...")
-    df["lemmas"] = df[text_col].apply(lambda t: _lemmatize(t, nlp))
-    print(f"Completed! Processed {len(df)} {lang_label} posts")
+    print(f"English lemmatization (spaCy) — {len(df)} rows...")
+    df["lemmas"] = df[text_col].apply(lemmatize_english)
+    print(f"Done. {len(df)} rows lemmatized.")
     return df
