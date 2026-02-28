@@ -18,8 +18,8 @@ load_dotenv()
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 # ── Telegram API ─────────────────────────────────────────────────────────────
-TELEGRAM_APP_ID = int(os.getenv("TELEGRAM_APP_ID", "0"))
-TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH", "")
+TELEGRAM_APP_ID = int(os.getenv("TELEGRAM_APP_ID"))
+TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
 
 # ── Twitter/X API ────────────────────────────────────────────────────────────
 TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN", "")
