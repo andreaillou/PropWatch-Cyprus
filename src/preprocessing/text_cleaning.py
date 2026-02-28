@@ -55,7 +55,7 @@ def detect_language(text: str) -> str:
     return result.name.lower()  # e.g. Language.RUSSIAN -> "russian"
 
 
-
+def classify_script(text: str) -> str:
     """Classify *text* as ``'cyrillic'``, ``'latin'``, ``'greek'``, or ``'unknown'``."""
     if pd.isna(text) or text == "":
         return "unknown"

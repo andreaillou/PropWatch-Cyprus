@@ -42,3 +42,7 @@ scientific-python-distributions-metadata>=0.0.1  # bertopic transitive dep
 # forwards column from the scraper is the primary amplification proxy.
 statsmodels>=0.14
 scikit-learn>=1.4
+
+# ── Twitter/X scraping (Jan 2026 kompromat event — Paper 2, H3) ──────────────
+twarc>=2.14
+pyyaml>=6.0

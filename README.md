@@ -23,13 +23,16 @@ channel (`rusembcy`) on Telegram.
 ```
 ├── main.ipynb                     # End-to-end pipeline notebook
 ├── requirements.txt               # Python dependencies (see sections)
-├── .env.example                   # Template for Telegram API credentials
+├── .env.example                   # Template for API credentials
+├── configs/
+│   └── channels.yaml              # Telegram channel source list (by tier)
 ├── src/
 │   ├── config.py                  # All file paths and scraping constants
 │   ├── scraping/
-│   │   └── telegram.py            # Telethon scraper — collects message_id,
-│   │                              #   views, forwards, reactions, reply_to_id,
-│   │                              #   edit_date alongside date/channel/text
+│   │   ├── telegram.py            # Telethon scraper — collects message_id,
+│   │   │                          #   views, forwards, reactions, reply_to_id,
+│   │   │                          #   edit_date alongside date/channel/text
+│   │   └── twitter.py             # twarc2 scraper — Jan 2026 kompromat event
 │   ├── preprocessing/
 │   │   ├── filtering.py           # 4-step pipeline: length → spam → topic
 │   │   │                          #   keywords → dedup; tags 9 binary columns
@@ -46,8 +49,11 @@ channel (`rusembcy`) on Telegram.
 │   │                              #   (script-agnostic, works on list[str])
 │   └── classification/
 │       └── model.py               # Propaganda classifier stub (TODO)
-├── cyprus_data/
-│   └── telegram/russian_embassy/  # All raw and processed CSV outputs
+├── data/
+│   ├── raw/
+│   │   ├── telegram/              # Per-channel raw CSVs
+│   │   └── twitter/               # Twitter raw CSVs
+│   └── processed/                 # Merged corpus and analysis outputs
 └── models/                        # Trained model weights (not committed)
 ```
 
@@ -74,6 +80,9 @@ cp .env.example .env
 jupyter notebook main.ipynb
 # — or run the scraper directly —
 python -m src.scraping.telegram
+
+# 6. (Optional) Twitter scraping — requires bearer token in .env
+python -m src.scraping.twitter
 ```
 
 ## Pipeline overview
@@ -99,15 +108,17 @@ compute_ngrams()           → bigrams / trigrams per language
 
 ## Status
 
-| Component                                    | Status                                 |
-| -------------------------------------------- | -------------------------------------- |
-| Telegram scraping (incl. forwards/reactions) | ✅ Working                             |
-| Keyword filtering & cleavage-code tagging    | ✅ Working (9 categories, 3 scripts)   |
-| lingua-py language detection                 | ✅ Working (Russian / Greek / English) |
-| Text cleaning & corpus split                 | ✅ Working                             |
-| Russian lemmatization (stanza)               | ✅ Working                             |
-| Greek lemmatization (stanza)                 | ✅ Working                             |
-| Frequency / n-gram analysis                  | ✅ Working (script-agnostic)           |
-| BERTopic narrative clustering                | 🚧 TODO — H1 / H4                      |
-| XLM-RoBERTa-large classification             | 🚧 TODO — awaiting fine-tuned weights  |
-| Interrupted time series (H3)                 | 🚧 TODO — Jan 2026 kompromat event     |
+| Component | Status |
+| :-- | :-- |
+| Telegram scraping (single channel) | ✅ Working |
+| Multi-channel config (`channels.yaml`) | 🚧 Added — populate Tier 2 handles from source list |
+| Twitter/X scraper (Jan 2026 kompromat) | 🚧 Added — requires bearer token |
+| Keyword filtering & cleavage-code tagging | ✅ Working |
+| lingua-py language detection | ✅ Working |
+| Text cleaning & corpus split | ✅ Working (bug fix applied) |
+| Russian lemmatization (stanza) | ✅ Working |
+| Greek lemmatization (stanza) | ✅ Working |
+| Frequency / n-gram analysis | ✅ Working |
+| BERTopic narrative clustering | 🚧 TODO — H1 / H4 |
+| XLM-RoBERTa-large classification | 🚧 TODO — awaiting fine-tuned weights |
+| Interrupted time series (H3) | 🚧 TODO — Jan 2026 kompromat event |

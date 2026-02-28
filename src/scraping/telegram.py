@@ -21,6 +21,7 @@ from src.config import (
     START_DATE,
     MESSAGE_LIMIT,
     RAW_CSV,
+    TELEGRAM_RAW_DIR,
 )
 
 
@@ -71,26 +72,36 @@ async def scrape_channels(
                 try:
                     entity = await client.get_entity(name)
                     msg_count = 0
+                    channel_data: list[dict] = []
+
+                    channel_dir = TELEGRAM_RAW_DIR / name
+                    channel_dir.mkdir(parents=True, exist_ok=True)
 
                     async for msg in client.iter_messages(entity, limit=message_limit):
                         if msg.date < start_date:
                             break
                         if msg.text:
-                            all_data.append(
-                                {
-                                    "message_id": msg.id,
-                                    "date": msg.date,
-                                    "channel": name,
-                                    "region": region,
-                                    "text": msg.text.replace("\n", " "),
-                                    "views": msg.views or 0,
-                                    "forwards": msg.forwards or 0,
-                                    "reactions": sum(r.count for r in msg.reactions.results) if msg.reactions else 0,
-                                    "reply_to_id": msg.reply_to.reply_to_msg_id if msg.reply_to else None,
-                                    "edit_date": msg.edit_date,
-                                }
-                            )
+                            row = {
+                                "message_id": msg.id,
+                                "date": msg.date,
+                                "channel": name,
+                                "region": region,
+                                "text": msg.text.replace("\n", " "),
+                                "views": msg.views or 0,
+                                "forwards": msg.forwards or 0,
+                                "reactions": sum(r.count for r in msg.reactions.results) if msg.reactions else 0,
+                                "reply_to_id": msg.reply_to.reply_to_msg_id if msg.reply_to else None,
+                                "edit_date": msg.edit_date,
+                            }
+                            channel_data.append(row)
                             msg_count += 1
+
+                    # Save per-channel CSV immediately
+                    if channel_data:
+                        pd.DataFrame(channel_data).to_csv(
+                            channel_dir / f"{name}_raw.csv", index=False
+                        )
+                    all_data.extend(channel_data)
 
                     print(f"   Success: Scraped {msg_count} messages.")
 
