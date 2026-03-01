@@ -24,7 +24,7 @@ EXCLUDE_KEYWORDS: list[str] = [
 
 # ── Inclusion keywords (political topics) ────────────────────────────────────
 INCLUDE_KEYWORDS: dict[str, list[str]] = {
-    "War_Conflict": [
+    "WAR": [
         # English / Latin
         r"war", r"invasion", r"conflict", r"military", r"army",
         r"frontline", r"attack",
@@ -34,7 +34,7 @@ INCLUDE_KEYWORDS: dict[str, list[str]] = {
         # Greek
         r"πόλεμ", r"εισβολ", r"σύγκρουσ", r"στρατ", r"μέτωπ", r"επίθεσ",
     ],
-    "Key_Actors": [
+    "KEY_ACT": [
         # English / Latin
         r"putin", r"zelensky", r"biden", r"nato", r"eu", r"europe",
         r"kremlin", r"moscow", r"kiev", r"kyiv", r"trump",
@@ -46,7 +46,7 @@ INCLUDE_KEYWORDS: dict[str, list[str]] = {
         r"πούτιν", r"ζελένσκ", r"μπάιντεν", r"νατο", r"\bεε\b", r"ευρώπ",
         r"κρεμλίν", r"μόσχ", r"κίεβ", r"ρωσί", r"ουκραιν", r"τραμπ",
     ],
-    "Ideological_Terms": [
+    "IDEAL_TER": [
         # English / Latin
         r"nazi", r"fascist", r"propaganda", r"fake", r"truth", r"west",
         r"imperial", r"russophobia",
