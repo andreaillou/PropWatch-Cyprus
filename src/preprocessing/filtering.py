@@ -220,6 +220,12 @@ _NLI_BATCH_SIZE: int = 32
 # Singleton cache so the model is loaded only once per session.
 _nli_pipeline: Pipeline | None = None
 
+if torch.cuda.is_available():
+    device = "cuda"       # Colab T4
+elif torch.backends.mps.is_available():
+    device = "mps"        # MacBook M1
+else:
+    device = "cpu"        # fallback
 
 def _get_nli_pipeline() -> Pipeline:
     """Lazy-load and cache the zero-shot-classification pipeline."""
@@ -230,7 +236,7 @@ def _get_nli_pipeline() -> Pipeline:
         _nli_pipeline = hf_pipeline(
             "zero-shot-classification",
             model=NLI_MODEL_NAME,
-            device="cpu",          # change to 0 / "cuda" if GPU available
+            device=device,
         )
     return _nli_pipeline
 
