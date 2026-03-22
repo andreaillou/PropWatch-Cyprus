@@ -1,21 +1,205 @@
-MIT License
+Academic Research License (ARL-1.0)
+Based on Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 
-Copyright (c) 2025 Andrey Vyalkov
+This is NOT a Creative Commons license and must not be referred to as such.
+It is a custom license derived from the CC BY-NC-SA 4.0 legal text (which
+is dedicated to the public domain under CC0 and may be adapted freely).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Copyright (c) 2026 Andrey Vyalkov(Andreas Illiou) and Iuliia Shirina
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+=======================================================================
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+SECTION 0 -- GOVERNMENT AND PROHIBITED ENTITY RESTRICTION
+
+This section supplements all other sections and takes precedence in
+case of conflict.
+
+a. "Prohibited Entity" means any of the following:
+
+       1. Any national, federal, state, regional, or local government
+          body, ministry, department, bureau, or agency;
+
+       2. Any military organization, armed forces, or defense
+          contractor primarily funded by a government;
+
+       3. Any intelligence, surveillance, or law enforcement agency;
+
+       4. Any political party, political campaign organization, or
+          political action committee;
+
+       5. Any entity that derives more than fifty percent (50%) of its
+          annual funding from government sources (including grants,
+          contracts, and subsidies), where such use is in furtherance
+          of that entity's government-sponsored activities;
+
+       6. Any private contractor, consultant, or third party acting
+          directly on behalf of, at the direction of, or primarily in
+          service of any of the entities listed above.
+
+b. If You are a Prohibited Entity, or are acting on behalf of a
+Prohibited Entity, You have no rights under this License. Any
+exercise of the Licensed Rights by a Prohibited Entity is void
+and constitutes a material breach of this License, automatically
+terminating any rights that may have been granted.
+
+c. For the avoidance of doubt, academic or research institutions
+that receive partial government funding (e.g. public universities)
+are NOT Prohibited Entities under this section, provided that the
+use of the Licensed Material is solely for independent academic
+research and is not conducted at the direction of a government
+body or in direct service of a government contract.
+
+=======================================================================
+
+SECTION 1 -- DEFINITIONS.
+
+a. Adapted Material means material subject to Copyright and Similar
+Rights that is derived from or based upon the Licensed Material
+and in which the Licensed Material is translated, altered,
+arranged, transformed, or otherwise modified in a manner requiring
+permission under the Copyright and Similar Rights held by the
+Licensor.
+
+b. Adapter's License means the license You apply to Your Copyright
+and Similar Rights in Your contributions to Adapted Material in
+accordance with the terms and conditions of this License.
+
+c. Copyright and Similar Rights means copyright and/or similar rights
+closely related to copyright including, without limitation,
+performance, broadcast, sound recording, and Sui Generis Database
+Rights.
+
+d. Licensed Material means all notebooks, scripts, source code,
+datasets, data files, documentation, and any other material in
+the repository to which the Licensor applied this License.
+
+e. Licensed Rights means the rights granted to You subject to the
+terms and conditions of this License.
+
+f. Licensor means the individual(s) granting rights under this
+License.
+
+g. NonCommercial means not primarily intended for or directed towards
+commercial advantage or monetary compensation.
+
+h. Share means to provide material to the public by any means or
+process that requires permission under the Licensed Rights.
+
+i. You means the individual or entity exercising the Licensed Rights
+under this License. Your has a corresponding meaning.
+
+SECTION 2 -- SCOPE.
+
+a. License grant.
+
+       1. Subject to the terms and conditions of this License,
+          including the restrictions in Section 0, the Licensor grants
+          You a worldwide, royalty-free, non-sublicensable,
+          non-exclusive, irrevocable license to:
+
+            a. reproduce and Share the Licensed Material, in whole or
+               in part, for NonCommercial purposes only; and
+
+            b. produce, reproduce, and Share Adapted Material for
+               NonCommercial purposes only.
+
+       2. The rights granted in Section 2(a)(1) are conditioned on
+          Your full compliance with Section 0. Any use by or on behalf
+          of a Prohibited Entity is outside the scope of this License.
+
+       3. No endorsement. Nothing in this License constitutes
+          permission to assert or imply that Your use of the Licensed
+          Material is connected with, sponsored, or endorsed by the
+          Licensor.
+
+b. Other rights.
+
+       1. Moral rights are not licensed under this License; however,
+          the Licensor waives the right to assert them to the limited
+          extent necessary to allow You to exercise the Licensed Rights.
+
+       2. Patent and trademark rights are not licensed under this
+          License.
+
+SECTION 3 -- LICENSE CONDITIONS.
+
+a. Attribution.
+
+       1. If You Share the Licensed Material (including in modified
+          form), You must:
+
+            a. Retain identification of the creator(s) of the Licensed
+               Material and any copyright notice;
+
+            b. Include a notice that refers to this License;
+
+            c. Indicate if You modified the Licensed Material; and
+
+            d. Include the text of, or a URI to, this License.
+
+b. ShareAlike.
+
+     If You Share Adapted Material You produce, the following apply:
+
+       1. The license You apply to Adapted Material must be this same
+          License (ARL-1.0) or a license with equivalent restrictions,
+          including the government-use prohibition in Section 0.
+
+       2. You may not apply terms to Adapted Material that remove or
+          weaken the restrictions in Section 0.
+
+SECTION 4 -- SUI GENERIS DATABASE RIGHTS.
+
+Where the Licensed Rights include Sui Generis Database Rights:
+
+a. Section 2(a)(1) grants You the right to extract, reuse,
+reproduce, and Share all or a substantial portion of the database
+contents for NonCommercial purposes only;
+
+b. If You include a substantial portion of the database contents
+in a database in which You have Sui Generis Database Rights, that
+database is Adapted Material for purposes of Section 3(b).
+
+SECTION 5 -- DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY.
+
+a. THE LICENSED MATERIAL IS PROVIDED "AS-IS" AND "AS-AVAILABLE."
+THE LICENSOR MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION WARRANTIES OF
+TITLE, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
+NON-INFRINGEMENT.
+
+b. TO THE EXTENT POSSIBLE, THE LICENSOR SHALL NOT BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL, OR OTHER DAMAGES
+ARISING OUT OF THIS LICENSE OR USE OF THE LICENSED MATERIAL.
+
+SECTION 6 -- TERM AND TERMINATION.
+
+a. This License applies for the term of the Copyright and Similar
+Rights licensed here.
+
+b. Your rights under this License terminate automatically if You
+fail to comply with any of its terms, including Section 0.
+
+c. Sections 0, 1, 5, 6, 7, and 8 survive termination.
+
+SECTION 7 -- OTHER TERMS AND CONDITIONS.
+
+a. The Licensor is not bound by any additional terms communicated
+by You unless expressly agreed in writing.
+
+SECTION 8 -- INTERPRETATION.
+
+a. If any provision of this License is deemed unenforceable, it
+shall be reformed to the minimum extent necessary to make it
+enforceable. If it cannot be reformed, it shall be severed
+without affecting the enforceability of the remaining terms.
+
+b. No waiver of any term shall be implied from failure to enforce.
+
+=======================================================================
+
+This license was prepared for academic research purposes. The base
+legal structure is adapted from the Creative Commons CC BY-NC-SA 4.0
+legal code, which is dedicated to the public domain under CC0.
+Creative Commons is not a party to this license and has not endorsed
+or reviewed these modifications.

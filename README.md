@@ -150,7 +150,10 @@ compute_ngrams()             → bigrams / trigrams per language
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This repository (code, notebooks, data, and all other materials) is
+licensed under the **Academic Research License (ARL-1.0)**.  
+Use by commercial entities or government bodies (and their agents) is
+**explicitly prohibited**. See [LICENSE](./LICENSE) for full terms.
 
 ## Authors
 
