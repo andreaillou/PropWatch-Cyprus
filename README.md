@@ -157,4 +157,4 @@ Use by commercial entities or government bodies (and their agents) is
 
 ## Authors
 
-Andrey Vyalkov — pipeline architecture & implementation | [Academic co-author] — research design & annotations
+Andrey Vyalkov — pipeline architecture & implementation | Iuliia Shirina — research design & annotations
