@@ -13,6 +13,7 @@ Applies a multi-stage pipeline:
 
 from __future__ import annotations
 
+import torch
 import logging
 import re
 from typing import TYPE_CHECKING
