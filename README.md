@@ -143,9 +143,8 @@ compute_ngrams()             → bigrams / trigrams per language
 | Greek lemmatization (stanza)                               | ✅ Working                               |
 | English lemmatization (spaCy)                              | ✅ Working                               |
 | Frequency / n-gram analysis                                | ✅ Working                               |
-| BERTopic narrative clustering                              | 🚧 Planned — H1 / H4                     |
+| BERTopic narrative clustering                              | ⚠️ Added                                 |
 | XLM-RoBERTa-large classification                           | 🚧 Planned — awaiting fine-tuned weights |
-| Interrupted time series (H3)                               | 🚧 Planned — Jan 2026 kompromat event    |
 
 ## License
 
