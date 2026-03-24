@@ -15,7 +15,7 @@ languages:
 
 embedding:
   batch_size: 64
-  device: cpu   # change to "cuda" if GPU available
+  device: cuda   # change to "cuda" if GPU available
 
 umap:
   n_neighbors: 15
