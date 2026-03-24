@@ -130,23 +130,22 @@ compute_ngrams()             → bigrams / trigrams per language
 
 ## Status
 
-| Component                                                  | Status                                              |
-| :--------------------------------------------------------- | :-------------------------------------------------- |
-| Telegram scraping (multi-channel)                          | ✅ Working                                          |
-| Multi-channel config (`channels.yaml`)                     | 🚧 Added — populate Tier 2 handles from source list |
-| Twitter/X scraper (Jan 2026 kompromat)                     | 🚧 Added — requires bearer token                    |
-| Tier 1 news scraper (RT/Sputnik via sitemap + trafilatura) | 🚧 Added — `python -m src.scraping.news`            |
-| Keyword filtering & cleavage-code tagging                  | ✅ Working                                          |
-| Zero-shot NLI political-relevance gate                     | ✅ Working                                          |
-| lingua-py language detection                               | ✅ Working                                          |
-| Text cleaning & corpus split                               | ✅ Working                                          |
-| Russian lemmatization (stanza)                             | ✅ Working                                          |
-| Greek lemmatization (stanza)                               | ✅ Working                                          |
-| English lemmatization (spaCy)                              | ✅ Working                                          |
-| Frequency / n-gram analysis                                | ✅ Working                                          |
-| BERTopic narrative clustering                              | 🚧 Planned — H1 / H4                                |
-| XLM-RoBERTa-large classification                           | 🚧 Planned — awaiting fine-tuned weights            |
-| Interrupted time series (H3)                               | 🚧 Planned — Jan 2026 kompromat event               |
+| Component                                                  | Status                                   |
+| :--------------------------------------------------------- | :--------------------------------------- |
+| Telegram scraping (multi-channel)                          | ✅ Working                               |
+| Multi-channel config (`channels.yaml`)                     | ✅ Working                               |
+| Tier 1 news scraper (RT/Sputnik via sitemap + trafilatura) | ✅ Working                               |
+| Keyword filtering & cleavage-code tagging                  | ✅ Working                               |
+| Zero-shot NLI political-relevance gate                     | ✅ Working                               |
+| lingua-py language detection                               | ✅ Working                               |
+| Text cleaning & corpus split                               | ✅ Working                               |
+| Russian lemmatization (stanza)                             | ✅ Working                               |
+| Greek lemmatization (stanza)                               | ✅ Working                               |
+| English lemmatization (spaCy)                              | ✅ Working                               |
+| Frequency / n-gram analysis                                | ✅ Working                               |
+| BERTopic narrative clustering                              | 🚧 Planned — H1 / H4                     |
+| XLM-RoBERTa-large classification                           | 🚧 Planned — awaiting fine-tuned weights |
+| Interrupted time series (H3)                               | 🚧 Planned — Jan 2026 kompromat event    |
 
 ## License
 
