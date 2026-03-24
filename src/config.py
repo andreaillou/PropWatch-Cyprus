@@ -93,3 +93,9 @@ TWITTER_PROCESSED_CSV = PROCESSED_DIR / "twitter_kompromat_processed.csv"
 # ── Model directory ───────────────────────────────────────────────────────────
 MODELS_DIR = ROOT_DIR / "models"
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── BERTopic outputs ─────────────────────────────────────────────────────────
+BERTOPIC_MODEL_DIR     = MODELS_DIR / "bertopic"
+BERTOPIC_TOPICS_CSV    = PROCESSED_DIR / "bertopic_topics.csv"
+BERTOPIC_TOPICINFO_CSV = PROCESSED_DIR / "bertopic_topic_info.csv"
+BERTOPIC_MODEL_DIR.mkdir(parents=True, exist_ok=True)

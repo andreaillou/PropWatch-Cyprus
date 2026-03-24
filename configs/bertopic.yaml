@@ -1,0 +1,41 @@
+# configs/bertopic.yaml
+random_seed: 1017939673
+n_samples: 2000   # draws used by check_seed.py only
+
+languages:
+  en:
+    embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+    vectorizer_stop_words: "english"
+  ru:
+    embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    vectorizer_stop_words: null   # handled by lemma vocab filtering
+  el:
+    embedding_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    vectorizer_stop_words: null
+
+embedding:
+  batch_size: 64
+  device: cpu   # change to "cuda" if GPU available
+
+umap:
+  n_neighbors: 15
+  n_components: 5
+  min_dist: 0.0
+  metric: cosine
+
+hdbscan:
+  min_cluster_size: 15
+  min_samples: 5
+  metric: euclidean
+  cluster_selection_method: eom
+
+vectorizer:
+  ngram_range: [1, 2]
+  min_df: 3
+  max_features: 10000
+
+representation:
+  top_n_words: 15
+  diversity: 0.3
+
+nr_topics: auto

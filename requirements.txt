@@ -36,7 +36,8 @@ tqdm>=4.66
 # BERTopic for H1 (narrative frames) and H4 (temporal narrative drift)
 bertopic>=0.16
 sentence-transformers>=3.0
-scientific-python-distributions-metadata  # bertopic transitive dep
+umap-learn>=0.5
+hdbscan>=0.8
 
 # ── Stats — interrupted time series (Paper 2, H3) ────────────────────────────
 # ITS regression around the January 2026 kompromat event.
