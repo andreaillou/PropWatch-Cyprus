@@ -1,16 +1,4 @@
-"""Lemmatization for all three sub-corpora.
-
-Language assignment:
-- Russian  → stanza ``ru`` pipeline  (handles morphological case inflection)
-- Greek    → stanza ``el`` pipeline  (outperforms spaCy on Modern Greek)
-- English  → spaCy ``en_core_web_lg`` (Track A features; RT/Sputnik English content)
-
-Do NOT use spaCy for Russian or Greek. Do NOT use stanza for English.
-
-First-time setup (run once):
-    import stanza; stanza.download("ru"); stanza.download("el")
-    python -m spacy download en_core_web_lg
-"""
+"""Lemmatization helpers for Russian, Greek, and English corpora."""
 
 from __future__ import annotations
 
@@ -30,7 +18,7 @@ from src.config import (
 logger = logging.getLogger(__name__)
 
 
-# ── Pipeline cache — load once, reuse everywhere ──────────────────────────────
+# Pipeline cache.
 _NLP_RU: stanza.Pipeline | None = None
 _NLP_EL: stanza.Pipeline | None = None
 _NLP_EN: spacy.Language | None = None
@@ -61,7 +49,7 @@ def _get_en_pipeline() -> spacy.Language:
     return _NLP_EN
 
 
-# ── Stop word lists ───────────────────────────────────────────────────────────
+# Stop word lists.
 _RU_STOPWORDS: frozenset[str] = frozenset({
     "и", "в", "не", "на", "что", "с", "по", "как", "это", "к",
     "из", "но", "за", "то", "до", "же", "от", "а", "или", "об",
@@ -78,7 +66,7 @@ _EL_STOPWORDS: frozenset[str] = frozenset({
 })
 
 
-# ── Shared lemma extractor ───────────────────────────────────────────────────
+# Shared lemma extractor.
 
 def _extract_lemmas(doc, stopwords: frozenset[str]) -> list[str]:
     """Extract filtered lemmas from a stanza Document."""
@@ -94,7 +82,7 @@ def _extract_lemmas(doc, stopwords: frozenset[str]) -> list[str]:
     ]
 
 
-# ── Single-text lemmatization ─────────────────────────────────────────────────
+# Single-text lemmatization stubs.
 
 def lemmatize_russian(text: str | float) -> list[str]:
     """Lemmatize one Russian string via stanza ru pipeline."""
@@ -128,14 +116,10 @@ def lemmatize_english(text: str | float) -> list[str]:
     ]
 
 
-# ── DataFrame-level helpers ───────────────────────────────────────────────────
+# DataFrame-level helpers.
 
 def _load_existing_lemmas(csv_path) -> tuple[frozenset[str], pd.DataFrame]:
-    """Load an existing lemmatized CSV and return (known_ids, existing_df).
-
-    If the file does not exist or has no rows, returns an empty set and an
-    empty DataFrame so callers can always safely concatenate.
-    """
+    """Load cached lemmatized rows and known message IDs."""
     from pathlib import Path
     p = Path(csv_path)
     if not p.exists():
@@ -143,7 +127,7 @@ def _load_existing_lemmas(csv_path) -> tuple[frozenset[str], pd.DataFrame]:
     existing = pd.read_csv(p)
     if existing.empty or "message_id" not in existing.columns:
         return frozenset(), pd.DataFrame()
-    # Restore lemmas column to Python lists if it was serialized as strings
+    # Restore list values if serialized as strings.
     if "lemmas" in existing.columns:
         existing["lemmas"] = existing["lemmas"].apply(
             lambda v: ast.literal_eval(v) if isinstance(v, str) else v
@@ -161,7 +145,7 @@ def _bulk_lemmatize(
         str(t) if not pd.isna(t) and str(t).strip() != "" else ""
         for t in df[text_col]
     ]
-    # bulk_process skips empty strings, so we track indices
+    # bulk_process skips empty strings, so track indices.
     non_empty_indices = [i for i, t in enumerate(texts) if t]
     non_empty_texts = [texts[i] for i in non_empty_indices]
 
@@ -177,11 +161,7 @@ def lemmatize_column(
     df: pd.DataFrame,
     text_col: str = "text_cleaned",
 ) -> pd.DataFrame:
-    """Add ``lemmas`` column to *df* using Russian stanza bulk lemmatization.
-
-    Rows whose ``message_id`` already exists in ``russian_posts_lemmatized.csv``
-    are skipped and merged from the cached file instead.
-    """
+    """Add a Russian lemmas column, reusing cached rows when available."""
     existing_ids, existing_df = _load_existing_lemmas(CYRILLIC_LEMMATIZED_CSV)
     new_df = df[~df["message_id"].astype(str).isin(existing_ids)].copy()
     logger.info(
@@ -200,11 +180,7 @@ def lemmatize_greek_column(
     df: pd.DataFrame,
     text_col: str = "text_cleaned",
 ) -> pd.DataFrame:
-    """Add ``lemmas`` column to *df* using Greek stanza bulk lemmatization.
-
-    Rows whose ``message_id`` already exists in ``greek_posts_lemmatized.csv``
-    are skipped and merged from the cached file instead.
-    """
+    """Add a Greek lemmas column, reusing cached rows when available."""
     existing_ids, existing_df = _load_existing_lemmas(GREEK_LEMMATIZED_CSV)
     new_df = df[~df["message_id"].astype(str).isin(existing_ids)].copy()
     logger.info(
@@ -223,14 +199,7 @@ def lemmatize_english_column(
     df: pd.DataFrame,
     text_col: str = "text_cleaned",
 ) -> pd.DataFrame:
-    """Add ``lemmas`` column to *df* using English spaCy lemmatization.
-
-    Rows whose ``message_id`` already exists in ``english_posts_lemmatized.csv``
-    are skipped and merged from the cached file instead.
-
-    Requires ``en_core_web_lg``:
-        python -m spacy download en_core_web_lg
-    """
+    """Add an English lemmas column, reusing cached rows when available."""
     existing_ids, existing_df = _load_existing_lemmas(LATIN_LEMMATIZED_CSV)
     new_df = df[~df["message_id"].astype(str).isin(existing_ids)].copy()
     logger.info(

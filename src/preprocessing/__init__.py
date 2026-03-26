@@ -1,1 +1,1 @@
-"""Text preprocessing sub-package (cleaning, filtering, language splitting)."""
+"""Preprocessing package."""

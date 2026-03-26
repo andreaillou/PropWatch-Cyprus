@@ -1,11 +1,4 @@
-"""Telegram channel scraper using Telethon.
-
-Usage (CLI)::
-
-    python -m src.scraping.telegram
-
-Or import and call :func:`scrape_channels` from a notebook / script.
-"""
+"""Telegram channel scraper using Telethon."""
 
 import asyncio
 import logging
@@ -36,36 +29,7 @@ async def scrape_channels(
     message_limit: int = MESSAGE_LIMIT,
     output_path=RAW_CSV,
 ) -> pd.DataFrame:
-    """Scrape messages from the configured Telegram channels.
-
-    Parameters
-    ----------
-    api_id, api_hash : Telegram API credentials.
-    channels : ``{region: [channel_name, ...]}`` mapping.
-    start_date : Only keep messages *after* this date.
-    message_limit : Max messages to fetch per channel.
-    output_path : Where to save the resulting CSV.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with columns:
-
-        - ``message_id``  – Telegram message ID; use for deduplication and
-          span-to-source linking in annotation.
-        - ``date``        – UTC timestamp of the original message.
-        - ``channel``     – Channel username/handle.
-        - ``region``      – Region label from the ``CHANNELS`` mapping.
-        - ``text``        – Message text (newlines collapsed to spaces).
-        - ``views``       – View count at scrape time (engagement signal).
-        - ``forwards``    – Forward count; primary amplification proxy for
-          H3 interrupted time-series analysis.  **Cannot be recovered
-          post-hoc — must be collected at scrape time.**
-        - ``reactions``   – Total reaction count (sum across all emoji types).
-        - ``reply_to_id`` – ``message_id`` of the parent message if this is
-          a reply, else ``None``.
-        - ``edit_date``   – UTC timestamp of the last edit, or ``None``.
-    """
+    """Scrape messages from the configured Telegram channels."""
     all_data: list[dict] = []
 
     async with TelegramClient("anon", api_id, api_hash) as client:
@@ -99,7 +63,7 @@ async def scrape_channels(
                             channel_data.append(row)
                             msg_count += 1
 
-                    # Save per-channel CSV immediately
+                    # Save per-channel output.
                     if channel_data:
                         pd.DataFrame(channel_data).to_csv(
                             channel_dir / f"{name}_raw.csv", index=False
@@ -123,7 +87,7 @@ async def scrape_channels(
                     )
 
                 delay = random.randint(10, 25)
-                logger.debug("Anti-ban pause: %ds", delay)
+                logger.debug("Pause: %ds", delay)
                 await asyncio.sleep(delay)
 
     df = pd.DataFrame(all_data)
@@ -132,6 +96,5 @@ async def scrape_channels(
     return df
 
 
-# Allow running as ``python -m src.scraping.telegram``
 if __name__ == "__main__":
     asyncio.run(scrape_channels())

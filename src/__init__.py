@@ -1,1 +1,1 @@
-"""PropWatch Cyprus — computational propaganda analysis pipeline."""
+"""PropWatch Cyprus package."""

@@ -1,1 +1,1 @@
-"""Corpus analysis sub-package (frequency, n-gram, lemmatization)."""
+"""Analysis package."""

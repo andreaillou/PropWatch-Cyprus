@@ -1,7 +1,6 @@
-# PropWatch Cyprus — Telegram channel source list
-# Tier classification follows the paper corpus design.
-# archived: true  → content sourced via sitemap + trafilatura, not live scraping
-# active: true    → live Telethon scraping
+# Channel source list.
+# archived: true means sitemap/archive source.
+# archived: false means live scraping source.
 
 tier1_archived:
   # - handle: rt_english
@@ -54,8 +53,7 @@ tier1_archived:
   #   # sitemap_index: verify URL before adding — check https://sputnik.md/sitemap.xml
 
 tier2_postban:
-  # Channels identified via EUvsDisinfo / EU DisinfoLab / Friedrich Naumann Foundation
-  # Cyprus report. Add verified handles here as source list is confirmed.
+  # Add verified post-ban channels here.
   - handle: warfakes
     label: War on Fakes
     language: russian
@@ -64,11 +62,11 @@ tier2_postban:
     label: Rybar (military-political)
     language: russian
     archived: false
-  # ADD MORE from Friedrich Naumann Foundation Cyprus report channel list
+  # Add more channels when confirmed.
 
 tier3_cyprus:
   - handle: rusembcy
     label: Russian Embassy Cyprus (existing)
     language: russian
     archived: false
-  # ADD diaspora and Cyprus-vector channels here once identified
+  # Add diaspora channels when identified.

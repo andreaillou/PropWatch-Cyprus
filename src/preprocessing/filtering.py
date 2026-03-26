@@ -1,15 +1,4 @@
-"""Filtering pipeline for scraped posts.
-
-Applies a multi-stage pipeline:
-1. Remove short messages (< 20 characters).
-2. Remove navigation / UI dumps.
-3. Remove spam / ads using an exclusion keyword list.
-4. Zero-shot NLI classification — keep only posts the model considers
-   politically / socially / culturally relevant.
-5. De-duplicate by text.
-6. Tag surviving posts with keyword categories (no removal — posts with
-   zero keyword hits stay with 0 across all category columns).
-"""
+"""Filtering utilities for scraped posts."""
 
 from __future__ import annotations
 
@@ -27,8 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# ── Exclusion keywords (anti-spam) ────────────────────────────────────────────
-# Kept empty for now; uncomment lines below as needed.
+# Exclusion keywords (anti-spam).
 EXCLUDE_KEYWORDS: list[str] = [
      "usdt", "btc", "crypto", "binance", "exchange",
      "дайджест", "digest"
@@ -38,7 +26,7 @@ EXCLUDE_KEYWORDS: list[str] = [
     # "whatsapp", "pm", "dm", "личк", "директ", "лс",
 ]
 
-# ── Inclusion keywords (political topics) ────────────────────────────────────
+# Inclusion keywords by category.
 INCLUDE_KEYWORDS: dict[str, list[str]] = {
     "WAR": [
         # English / Latin
@@ -73,7 +61,7 @@ INCLUDE_KEYWORDS: dict[str, list[str]] = {
         r"ναζ", r"φασίστ", r"προπαγάνδ", r"ψεύδ", r"αλήθει",
         r"δύσ", r"ιμπεριαλ", r"ρωσοφοβ",
     ],
-    # ── Cleavage codes (Layer 2 annotation schema) ────────────────────────
+    # Cleavage code categories.
     "CY_DIV": [
         # English / Latin
         r"cyprus problem", r"reunification", r"occupied", r"buffer zone",
@@ -125,7 +113,7 @@ INCLUDE_KEYWORDS: dict[str, list[str]] = {
 }
 
 
-# ── Helper predicates ─────────────────────────────────────────────────────────
+# Helper predicates.
 
 def _matches_any(text: str, keywords: list[str]) -> bool:
     text_lower = text.lower()
@@ -147,17 +135,7 @@ def has_exclusion(text) -> bool:
 
 
 def is_navigation_dump(text) -> bool:
-    """Return ``True`` if *text* looks like a scraped navigation/UI page.
-
-    Detects two patterns that trafilatura sometimes returns instead of an
-    article:
-
-    1. **Icon-list dump** — multiple lines starting with ``"icon "``.
-       Characteristic of RT / Sputnik CSS icon-font listings.
-    2. **Menu/nav dump** — the majority of non-empty lines are very short
-       (≤ 5 words), which indicates a navigation menu, tag page, or site
-       index rather than continuous prose.
-    """
+    """Return True if text looks like navigation or UI dump content."""
     if not isinstance(text, str):
         return False
 
@@ -165,13 +143,12 @@ def is_navigation_dump(text) -> bool:
     if not lines:
         return False
 
-    # Heuristic 1: icon-font dump (≥4 lines starting with "icon ")
+    # Heuristic 1: icon-font dump.
     icon_lines = sum(1 for ln in lines if ln.lower().startswith("icon "))
     if icon_lines >= 4:
         return True
 
-    # Heuristic 2: nav/menu dump — >55 % of lines have ≤5 words AND
-    # there are at least 15 lines (short texts are handled by length filter)
+    # Heuristic 2: mostly short menu-like lines.
     if len(lines) >= 15:
         short = sum(1 for ln in lines if len(ln.split()) <= 5)
         if short / len(lines) > 0.55:
@@ -196,29 +173,27 @@ def has_inclusion(text) -> bool:
     return False
 
 
-# ── Zero-shot NLI political-relevance gate ────────────────────────────────────
+# Zero-shot NLI relevance gate.
 
-# Tone-neutral hypothesis used for zero-shot NLI classification.
-# The wording avoids value-laden terms; it simply asks whether the text
-# relates to topics a political scientist would study.
+# Hypothesis text for the NLI gate.
 NLI_HYPOTHESIS: str = (
     "This text discusses a political, geopolitical, social, cultural, "
     "or public-policy issue."
 )
 
-# Model identifier — multilingual NLI, covers EN / EL / RU.
+# Model identifier.
 NLI_MODEL_NAME: str = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
 
-# Entailment probability threshold.  Posts scoring below this are dropped.
+# Entailment threshold.
 NLI_THRESHOLD: float = 0.5
 
-# Maximum token length fed to the NLI model (truncated, not split).
+# Maximum token length (truncated).
 _NLI_MAX_LENGTH: int = 512
 
-# Batch size for NLI inference (tune for your GPU / RAM).
+# Batch size for NLI inference.
 _NLI_BATCH_SIZE: int = 32
 
-# Singleton cache so the model is loaded only once per session.
+# Cache model pipeline per session.
 _nli_pipeline: Pipeline | None = None
 
 if torch.cuda.is_available():
@@ -247,8 +222,7 @@ def nli_score(text: str) -> float:
     if not isinstance(text, str) or not text.strip():
         return 0.0
     clf = _get_nli_pipeline()
-    # Truncate to first ~_NLI_MAX_LENGTH chars (≈tokens) to stay within
-    # the model's context window without expensive tokeniser overhead.
+    # Truncate input to fit model context.
     result = clf(
         text[:_NLI_MAX_LENGTH * 4],
         candidate_labels=["political or social topic", "other"],
@@ -278,7 +252,7 @@ def nli_scores_batch(
             candidate_labels=["political or social topic", "other"],
             hypothesis_template="This text is about {}.",
         )
-        # When batch size == 1, transformers may return a dict instead of list.
+        # transformers may return a dict for single-item batches.
         if isinstance(results, dict):
             results = [results]
         for r in results:
@@ -291,7 +265,7 @@ def nli_scores_batch(
     return np.array(scores)
 
 
-# ── Main pipeline ─────────────────────────────────────────────────────────────
+# Main pipeline.
 
 def filter_messages(
     df: pd.DataFrame,
@@ -299,19 +273,7 @@ def filter_messages(
     nli_threshold: float = NLI_THRESHOLD,
     nli_batch_size: int = _NLI_BATCH_SIZE,
 ) -> pd.DataFrame:
-    """Run the filtering pipeline.
-
-    Steps
-    -----
-    1. Length filter (< 20 chars).
-    2. Navigation / UI dump filter.
-    3. Exclusion-keyword spam filter.
-    4. Zero-shot NLI political-relevance gate.
-    5. De-duplication.
-
-    After filtering, ``tag_categories`` should be called on the result to
-    add keyword-based category columns (no posts are removed at that stage).
-    """
+    """Run length, nav-dump, spam, NLI, and dedup filters."""
     n0 = len(df)
 
     # Step 1 – Length filter

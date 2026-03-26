@@ -1,12 +1,4 @@
-"""Twitter/X scraper for the January 2026 Cyprus kompromat event.
-
-Uses twarc2 (Twitter API v2 recent search endpoint).
-Set TWITTER_BEARER_TOKEN in .env before running.
-
-Usage::
-
-    python -m src.scraping.twitter
-"""
+"""Twitter/X scraper using twarc2 recent search."""
 
 import logging
 import time
@@ -20,8 +12,7 @@ from src.config import TWITTER_BEARER_TOKEN, TWITTER_RAW_DIR, TWITTER_RAW_CSV
 
 logger = logging.getLogger(__name__)
 
-# Default query for the Jan 2026 Christodoulides kompromat operation.
-# Expand or narrow via CLI args or by passing query= to scrape_twitter().
+# Default query window and keywords.
 DEFAULT_QUERY = (
     "(Christodoulides OR #Cyprus OR Κυριάκος) "
     "lang:en OR lang:ru OR lang:el "
@@ -39,12 +30,7 @@ def scrape_twitter(
     max_results: int = 100,          # per page; twarc2 handles pagination
     output_path: Path = TWITTER_RAW_CSV,
 ) -> pd.DataFrame:
-    """Collect tweets matching *query* within the given date window.
-
-    Parameters match the twarc2 recent search endpoint. For full-archive
-    access (pre-7-day window), an Academic Research or Pro tier token is
-    required — update client initialisation accordingly.
-    """
+    """Collect tweets matching query within the date window."""
     client = Twarc2(bearer_token=TWITTER_BEARER_TOKEN)
     rows: list[dict] = []
 
@@ -73,7 +59,7 @@ def scrape_twitter(
                 "reply_to_id": reply_id,
                 "edit_date":   None,
             })
-        time.sleep(1)  # stay inside rate window
+        time.sleep(1)
 
     df = pd.DataFrame(rows)
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -11,8 +11,7 @@ from lingua import Language, LanguageDetectorBuilder
 logger = logging.getLogger(__name__)
 
 
-# ── Lingua-py language detector (built once at import time) ─────────────────────
-# Building the detector is expensive; keep it as a module-level singleton.
+# Build detector once at import time.
 _DETECTOR = (
     LanguageDetectorBuilder.from_languages(
         Language.RUSSIAN, Language.GREEK, Language.ENGLISH
@@ -21,12 +20,7 @@ _DETECTOR = (
 
 
 def clean_text(text) -> str:
-    """Normalize a single message string.
-
-    * Strips URLs and Telegram markdown.
-    * Removes emojis / non-standard characters (keeps basic punctuation).
-    * Collapses whitespace.
-    """
+    """Normalize a single message string."""
     if pd.isna(text):
         return ""
     text = str(text)
@@ -38,20 +32,7 @@ def clean_text(text) -> str:
 
 
 def detect_language(text: str) -> str:
-    """Return the dominant language of *text* using lingua-py.
-
-    Returns
-    -------
-    str
-        ``'russian'``, ``'greek'``, ``'english'``, or ``'unknown'`` when
-        lingua-py cannot confidently identify the language (e.g. very short
-        strings or code-switched text).
-
-    Notes
-    -----
-    This is the **authoritative** language label for downstream NLP models.
-    ``classify_script`` is kept as a fast secondary signal only.
-    """
+    """Return dominant language using lingua-py."""
     if pd.isna(text) or str(text).strip() == "":
         return "unknown"
     result = _DETECTOR.detect_language_of(str(text))
@@ -76,19 +57,7 @@ def clean_and_split(
     df: pd.DataFrame,
     text_col: str = "text",
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Clean the text column and split by detected language.
-
-    Adds two classification columns:
-
-    * ``script_type`` – fast character-count heuristic
-      (``'cyrillic'`` / ``'greek'`` / ``'latin'`` / ``'unknown'``).
-    * ``language``    – authoritative lingua-py detection
-      (``'russian'`` / ``'greek'`` / ``'english'`` / ``'unknown'``).
-
-    Splits are based on ``language`` (the authoritative signal).
-
-    Returns ``(full_df, russian_df, english_df, greek_df)``.
-    """
+    """Clean text and split into Russian, English, and Greek dataframes."""
     df["text_cleaned"] = df[text_col].apply(clean_text)
     df["script_type"]  = df["text_cleaned"].apply(classify_script)
     df["language"]     = df["text_cleaned"].apply(detect_language)

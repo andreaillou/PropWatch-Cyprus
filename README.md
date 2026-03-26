@@ -85,7 +85,7 @@ python -m spacy download en_core_web_lg
 
 # 4. Configure Telegram credentials
 cp .env.example .env
-# Edit .env — set TELEGRAM_APP_ID and TELEGRAM_API_HASH
+# Edit .env — set TELEGRAM_APP_ID, TELEGRAM_API_HASH, and RANDOM_SEED
 
 # 5. Run the notebook
 jupyter notebook main.ipynb

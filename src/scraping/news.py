@@ -1,21 +1,4 @@
-"""Direct sitemap scraper for Tier 1 news sources (RT, Sputnik).
-
-Discovers article URLs from XML sitemaps, filters for Cyprus relevance
-using the existing inclusion keyword list, then fetches full text via
-trafilatura. No external API required — works with any accessible domain.
-
-Strategy:
-  1. Fetch sitemap index → collect per-month child sitemaps
-  2. Filter child sitemaps to the study window (START_DATE → today)
-  3. Parse each child sitemap → collect article URLs + lastmod dates
-  4. Pre-filter URL/title by Cyprus keywords to avoid fetching every article
-  5. Fetch full text via trafilatura for matched URLs
-  6. Save per-domain CSVs + merged output
-
-Usage::
-
-    python -m src.scraping.news
-"""
+"""Sitemap scraper for archived news sources."""
 
 import hashlib
 import logging
@@ -33,13 +16,9 @@ from src.preprocessing.filtering import has_inclusion
 
 logger = logging.getLogger(__name__)
 
-# ── Sitemap namespace ─────────────────────────────────────────────────────────
 _NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-# ── Cyprus URL-level pre-filter keywords (ASCII only, lowercase) ──────────────
-# These are checked against the article URL and sitemap <title> only —
-# cheap pre-filter before the expensive trafilatura fetch.
-# Kept intentionally broad; has_inclusion() does the precise filtering.
+# URL/title hint keywords used by the quick pre-filter.
 _CYPRUS_URL_HINTS = [
     "cyprus", "nicosia", "famagusta", "christodoulides",
     "limassol", "larnaca", "paphos",
@@ -69,13 +48,7 @@ def _collect_article_urls(
     start_date: datetime = START_DATE,
     delay: float = 2.0,
 ) -> list[dict]:
-    """Walk a sitemap index and return article dicts within the date window.
-
-    Each dict has: ``url``, ``lastmod`` (str), ``title`` (str, may be empty).
-
-    Only child sitemaps whose name suggests they fall within the study
-    window are fetched (cheap heuristic: year appears in the sitemap URL).
-    """
+    """Walk a sitemap index and return article URL metadata."""
     logger.info("Fetching sitemap index: %s", sitemap_index_url)
     root = _fetch_sitemap(sitemap_index_url, delay=delay)
     if root is None:
@@ -84,8 +57,7 @@ def _collect_article_urls(
     study_years = {str(y) for y in range(start_date.year, datetime.now().year + 1)}
     article_entries: list[dict] = []
 
-    # Root may be a <sitemapindex> (list of child sitemaps) or directly
-    # a <urlset> (flat list of URLs — some sites skip the index level)
+    # Root can be either sitemapindex or urlset.
     tag = root.tag.split("}")[-1] if "}" in root.tag else root.tag
 
     if tag == "sitemapindex":
@@ -95,7 +67,7 @@ def _collect_article_urls(
             for loc in sm.findall("sm:loc", _NS)
             if loc.text
         ]
-        # Heuristic: only fetch child sitemaps that contain a study year in URL
+        # Fetch child sitemaps that appear to be in the study window.
         child_urls = [u for u in child_urls if any(yr in u for yr in study_years)]
         logger.info("Found %d child sitemaps in study window", len(child_urls))
 
@@ -114,7 +86,7 @@ def _collect_article_urls(
                     article_entries.append({"url": loc, "lastmod": lastmod, "title": title})
 
     elif tag == "urlset":
-        # Flat sitemap — no child level
+        # Flat sitemap with direct URL entries.
         for url_el in root.findall("sm:url", _NS):
             loc = url_el.findtext("sm:loc", namespaces=_NS) or ""
             lastmod = url_el.findtext("sm:lastmod", namespaces=_NS) or ""
@@ -133,29 +105,14 @@ def scrape_news_domain(
     sitemap_delay: float = 2.0,
     max_articles: int = 500,
 ) -> pd.DataFrame:
-    """Scrape one news domain via its sitemap index.
-
-    Parameters
-    ----------
-    domain            : e.g. ``"rt.com"`` — used as the ``channel`` field
-    sitemap_index_url : URL of the top-level sitemap index XML
-    region            : corpus region label (``"tier1_archived"``)
-    start_date        : only keep articles on or after this date
-    fetch_delay       : seconds between trafilatura article fetches
-    sitemap_delay     : seconds between sitemap XML requests
-    max_articles      : safety cap — stop after this many fetched articles
-
-    Returns
-    -------
-    pd.DataFrame in the standard corpus schema
-    """
+    """Scrape one domain through its sitemap index."""
     ARCHIVED_RAW_DIR.mkdir(parents=True, exist_ok=True)
 
     logger.info("Scraping %s", domain)
     all_entries = _collect_article_urls(sitemap_index_url, start_date, sitemap_delay)
     logger.info("Total URLs discovered: %d", len(all_entries))
 
-    # Cyprus URL/title pre-filter disabled — collect all entries
+    # Pre-filter is currently disabled.
     cyprus_entries = all_entries
     logger.debug(
         "Cyprus URL pre-filter disabled — processing all %d URLs",
@@ -174,11 +131,11 @@ def scrape_news_domain(
             time.sleep(fetch_delay)
             continue
 
-        # Fall back to title if trafilatura returned nothing
+        # Fall back to sitemap title if extraction is empty.
         if not text:
             text = entry["title"]
 
-        # Cyprus inclusion filter disabled — keep all articles with text
+        # Inclusion filter is currently disabled.
         if not text:
             time.sleep(fetch_delay * 0.5)
             continue
@@ -210,11 +167,7 @@ def scrape_news_domain(
 def scrape_all_tier1(
     config_path: Path | None = None,
 ) -> pd.DataFrame:
-    """Scrape all Tier 1 sources defined in configs/channels.yaml.
-
-    Reads ``sitemap_index`` URL from each ``tier1_archived`` entry.
-    Skips entries without a ``sitemap_index`` key.
-    """
+    """Scrape all tier1_archived sources from channels.yaml."""
     import yaml
     from src.config import ROOT_DIR
 

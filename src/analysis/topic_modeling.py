@@ -1,14 +1,5 @@
 # src/analysis/topic_modeling.py
-"""BERTopic narrative clustering — multilingual (EN / RU / EL).
-
-Each language is modelled independently with its own sentence-transformer
-embedding and vocabulary, then outputs are merged into a single CSV with
-a `lang` column for downstream cross-language analysis.
-
-Usage (from main.ipynb or CLI):
-    from src.analysis.topic_modeling import run_all_languages
-    results = run_all_languages()
-"""
+"""BERTopic clustering for EN/RU/EL corpora."""
 from __future__ import annotations
 
 import ast
@@ -32,12 +23,13 @@ from src.config import (
     BERTOPIC_TOPICS_CSV,
     BERTOPIC_TOPICINFO_CSV,
     ROOT_DIR,
+    RANDOM_SEED,
 )
 
 logger = logging.getLogger(__name__)
 _CONFIG_FILE = ROOT_DIR / "configs" / "bertopic.yaml"
 
-# Maps lang tag → (lemmatized CSV path, text column, lemma column)
+# Maps language tag to (csv path, text column, lemma column).
 _LANG_SOURCES: dict[str, tuple[Path, str, str]] = {
     "en": (LATIN_LEMMATIZED_CSV,    "text_cleaned", "lemmas"),
     "ru": (CYRILLIC_LEMMATIZED_CSV, "text_cleaned", "lemmas"),
@@ -65,7 +57,7 @@ def _build_model(cfg: dict, lang: str, vocab: list[str] | None) -> BERTopic:
     ec, uc    = cfg["embedding"], cfg["umap"]
     hc, vc    = cfg["hdbscan"],   cfg["vectorizer"]
     rc        = cfg["representation"]
-    seed      = cfg["random_seed"]
+    seed      = RANDOM_SEED
 
     embedding_model = SentenceTransformer(
         lang_cfg["embedding_model"], device=ec["device"]
@@ -85,7 +77,7 @@ def _build_model(cfg: dict, lang: str, vocab: list[str] | None) -> BERTopic:
         prediction_data=True,
     )
     vectorizer = CountVectorizer(
-        vocabulary=vocab,                            # lemma-constrained vocab
+        vocabulary=vocab,
         ngram_range=tuple(vc["ngram_range"]),
         min_df=vc["min_df"],
         max_features=vc.get("max_features") if vocab is None else None,
@@ -138,7 +130,7 @@ def run_language(lang: str, cfg: dict | None = None) -> pd.DataFrame:
     label_map  = dict(zip(topic_info["Topic"], topic_info["Name"]))
     df["topic_label"] = df["topic_id"].map(label_map)
 
-    # Persist model artefacts per language
+    # Persist model artifacts per language.
     save_path = BERTOPIC_MODEL_DIR / f"bertopic_{lang}"
     model.save(
         str(save_path),
@@ -148,7 +140,7 @@ def run_language(lang: str, cfg: dict | None = None) -> pd.DataFrame:
     )
     logger.info("[%s] Model saved → %s", lang, save_path)
 
-    # Per-language topic info
+    # Save per-language topic info.
     lang_info_path = BERTOPIC_TOPICINFO_CSV.parent / f"bertopic_topic_info_{lang}.csv"
     topic_info.to_csv(lang_info_path, index=False)
     logger.info("[%s] %d topics found (excl. noise).",
@@ -158,15 +150,7 @@ def run_language(lang: str, cfg: dict | None = None) -> pd.DataFrame:
 
 
 def run_all_languages(langs: list[str] | None = None) -> pd.DataFrame:
-    """Run BERTopic for EN, RU, EL and merge into one output CSV.
-
-    Args:
-        langs: subset to run, e.g. ["en", "ru"]. Defaults to all three.
-
-    Returns:
-        Merged DataFrame with columns:
-        message_id, date, channel, lang, topic_id, topic_label
-    """
+    """Run BERTopic for selected languages and merge output."""
     if langs is None:
         langs = ["en", "ru", "el"]
 
